@@ -24,12 +24,13 @@ rien installer, pour que les utilisateurs testent le concept dans le navigateur.
 
 ## Lancer
 
-Aucune dépendance, aucun build :
+React + Vite + TypeScript :
 
 ```sh
-open index.html
-# ou, pour un serveur local :
-python3 -m http.server 8000
+npm install
+npm run dev      # serveur de dev sur http://localhost:5173
+npm run build    # build de production dans dist/
+npm run preview  # prévisualiser le build
 ```
 
 ## Limites de la démo
@@ -39,8 +40,27 @@ certaines combinaisons système (⌘ Espace, ⌘ Tab) sont interceptées par mac
 navigateur et ne peuvent donc pas être capturées ici. L'exécution réelle des raccourcis
 relève de l'application native.
 
+## Ressources statiques
+
+Déposez icônes et images dans `public/` — Vite les sert tels quels et les copie
+à la racine de `dist/` au build. Le chemin d'accès omet le préfixe `public/` :
+
+```tsx
+<img src="/icons/finder.svg" alt="Finder" />
+<img src="/img/wallpaper.jpg" alt="Fond d'écran" />
+```
+
+Réservez `public/` aux fichiers dont le nom doit rester exact (favicon, `robots.txt`)
+ou dont le chemin est construit à l'exécution. Pour tout le reste, préférez un import
+depuis `src/assets/` : Vite versionne le fichier, le met en cache durablement et
+signale un chemin cassé dès la compilation.
+
 ## Structure
 
-- `index.html` — structure de la page
-- `styles.css` — thème et mise en page
-- `app.js` — état, rendu, capture clavier, conflits, import/export
+- `index.html` — point de montage
+- `src/main.tsx` — entrée React
+- `src/App.tsx` — composition et filtrage
+- `src/components/` — Topbar, Sidebar, ShortcutList, ShortcutRow, Combo, HistoryPanel, ShortcutModal
+- `src/lib/` — types, données par défaut, persistance, capture clavier, conflits, hook d'état
+- `src/styles.css` — thème et mise en page
+- `public/icons/`, `public/img/` — ressources statiques servies telles quelles

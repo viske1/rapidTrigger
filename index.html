@@ -4,97 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Shortcut Center — Démo</title>
-<link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<header class="topbar">
-  <div class="brand">
-    <span class="logo">⌘</span>
-    <div>
-      <h1>Shortcut Center</h1>
-      <p class="tagline">Centre de contrôle des raccourcis macOS — démo web</p>
-    </div>
-  </div>
-  <div class="topbar-actions">
-    <button id="btn-new" class="btn primary">＋ Nouveau raccourci</button>
-    <button id="btn-export" class="btn">Exporter</button>
-    <button id="btn-import" class="btn">Importer</button>
-    <input type="file" id="file-import" accept="application/json" hidden>
-    <button id="btn-reset" class="btn danger-ghost">Réinitialiser</button>
-  </div>
-</header>
-
-<main class="layout">
-  <aside class="sidebar">
-    <div class="search-wrap">
-      <input id="search" type="search" placeholder="Rechercher un raccourci, une action…">
-    </div>
-    <nav id="scopes" class="scopes"></nav>
-    <div class="sidebar-foot">
-      <div class="stat"><strong id="stat-total">0</strong><span>raccourcis</span></div>
-      <div class="stat"><strong id="stat-modified">0</strong><span>modifiés</span></div>
-      <div class="stat"><strong id="stat-conflicts">0</strong><span>conflits</span></div>
-    </div>
-  </aside>
-
-  <section class="content">
-    <div class="content-head">
-      <div>
-        <h2 id="scope-title">Tous les raccourcis</h2>
-        <p id="scope-sub" class="muted"></p>
-      </div>
-      <div class="filters">
-        <label class="chk"><input type="checkbox" id="only-modified"> Modifiés seulement</label>
-        <label class="chk"><input type="checkbox" id="only-conflicts"> Conflits seulement</label>
-      </div>
-    </div>
-    <div id="conflict-banner" class="banner hidden"></div>
-    <div id="list" class="list"></div>
-    <p id="empty" class="empty hidden">Aucun raccourci ne correspond à votre recherche.</p>
-  </section>
-
-  <aside class="history">
-    <h3>Journal des modifications</h3>
-    <button id="btn-clear-history" class="btn tiny">Vider</button>
-    <ul id="history-list" class="history-list"></ul>
-  </aside>
-</main>
-
-<div id="modal" class="modal hidden">
-  <div class="modal-card">
-    <h3 id="modal-title">Nouveau raccourci</h3>
-    <form id="form">
-      <label>Nom de l'action
-        <input name="name" required placeholder="Ouvrir le dossier Projets">
-      </label>
-      <label>Cible (fichier, dossier, application, URL…)
-        <input name="target" required placeholder="~/git/shortcut-center">
-      </label>
-      <label>Type
-        <select name="type">
-          <option value="app">Application</option>
-          <option value="folder">Dossier</option>
-          <option value="file">Fichier</option>
-          <option value="url">URL</option>
-          <option value="script">Script</option>
-          <option value="system">Système</option>
-        </select>
-      </label>
-      <label>Portée
-        <select name="scope"></select>
-      </label>
-      <label>Raccourci
-        <input name="combo" id="combo-capture" readonly placeholder="Cliquez puis tapez la combinaison" autocomplete="off">
-      </label>
-      <p id="combo-hint" class="hint">Astuce : cliquez dans le champ et appuyez sur la combinaison souhaitée (ex. ⌘⌥K).</p>
-      <div class="modal-actions">
-        <button type="button" id="btn-cancel" class="btn">Annuler</button>
-        <button type="submit" class="btn primary">Enregistrer</button>
-      </div>
-    </form>
-  </div>
-</div>
-
-<script src="app.js"></script>
+<div id="root"></div>
+<script type="module" src="/src/main.tsx"></script>
 </body>
 </html>

@@ -1,4 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
+import { Dropdown } from "./Dropdown";
+import {
+  ButtonOptionDropdown,
+  DropdownSeparator,
+} from "./ButtonOptionDropdown";
+import { ShortcutReminder } from "./ShortcutReminder";
+import { useModifierHold } from "../lib/useModifierHold";
 import type { ReactNode } from "react";
 import { KeySlot } from "./KeyCap";
 import { WifiIcon } from "./icons/WifiIcon";
@@ -37,7 +44,49 @@ function useClock() {
  * Maquette de bureau macOS : écran, barre de menu et dock d'emplacements vides.
  * Les touches (KeyCap) viendront s'y placer une fois la mise en scène arrêtée.
  */
+interface MenuItem {
+  label: string;
+  combo?: string;
+  submenu?: boolean;
+}
+
+/** Entrées du menu « Raccourcis », dans l'esprit des menus macOS. */
+const MENU_GROUPS: MenuItem[][] = [
+  [
+    { label: "Annuler", combo: "⌘ Z" },
+    { label: "Rétablir", combo: "⇧ ⌘ Z" },
+  ],
+  [
+    { label: "Couper", combo: "⌘ X" },
+    { label: "Copier", combo: "⌘ C" },
+    { label: "Coller", combo: "⌘ V" },
+  ],
+  [
+    { label: "Rechercher", combo: "⌘ F" },
+    { label: "Remplacer", combo: "⌥ ⌘ F" },
+    // Sans combo : ⌘ + survol y propose « Créer » au lieu de « Modifier ».
+    { label: "Rechercher dans la sélection" },
+  ],
+  [
+    { label: "Rechercher dans les fichiers", combo: "⇧ ⌘ F" },
+    { label: "Remplacer dans les fichiers", combo: "⇧ ⌘ H" },
+    { label: "Ouvrir le dossier du projet" },
+  ],
+];
+
 export function MacDemo({ slots = 4, onOpen, children }: MacDemoProps) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const { held, symbols } = useModifierHold();
+
+  // Raccourcis dont la combinaison commence par les modificateurs maintenus.
+  const reminderEntries = useMemo(() => {
+    if (symbols.length === 0) return [];
+
+    const prefix = symbols.join(" ");
+    return MENU_GROUPS.flat()
+      .filter((item): item is { label: string; combo: string } => Boolean(item.combo))
+      .filter(item => item.combo.startsWith(prefix + " "));
+  }, [symbols]);
   const clock = useClock();
 
   return (
@@ -64,17 +113,53 @@ export function MacDemo({ slots = 4, onOpen, children }: MacDemoProps) {
             className="grid h-[30px] w-11 place-items-center rounded-b-[12px] rounded-r-[12px] rounded-tl-[18px] bg-white/[.16] text-[15px]"
           ></span> */}
 
-          <div className="flex items-center gap-3 rounded-b-[12px] rounded-r-[12px] rounded-tl-[18px] bg-white/[.16] pl-1 pr-1 py-[4px] text-[15px] backdrop-blur-sm tracking-[-0.2px]">
-            <button
-              type="button"
-              onClick={onOpen}
-              aria-label="Ouvrir le centre de contrôle"
-              className="hover-pop grid h-7 place-items-center rounded-b-[9px] rounded-r-[9px] rounded-tl-[14px] px-2.5
-                  focus-visible:outline-none"
+          {/*
+            Le dropdown est sorti du conteneur flouté : backdrop-filter y crée
+            un contexte d'empilement dont un enfant ne peut plus flouter le
+            dehors. Ce wrapper relative sert d'ancre de positionnement.
+          */}
+          <div className="relative">
+            <div className="flex items-center gap-3 rounded-b-[12px] rounded-r-[12px] rounded-tl-[18px] bg-white/[.16] pl-1 pr-1 py-[4px] text-[15px] backdrop-blur-sm tracking-[-0.2px]">
+              <button
+                type="button"
+                data-dropdown-trigger
+                onClick={() => setMenuOpen((o) => !o)}
+                aria-haspopup="menu"
+                aria-expanded={menuOpen}
+                className="hover-pop grid h-7 place-items-center rounded-b-[9px] rounded-r-[9px] rounded-tl-[14px] px-2.5
+                    focus-visible:outline-none"
+              >
+                <span className="font-medium">Raccourcis</span>
+              </button>
+            </div>
+
+            <Dropdown
+              open={menuOpen}
+              onClose={() => setMenuOpen(false)}
+              className="w-[320px]"
             >
-              {" "}
-              <span className="font-medium">Raccourcis</span>
-            </button>
+              {MENU_GROUPS.map((group, i) => (
+                <div key={i}>
+                  {i > 0 && <DropdownSeparator />}
+                  {group.map((item) => (
+                    <ButtonOptionDropdown
+                      key={item.label}
+                      label={item.label}
+                      combo={item.combo}
+                      submenu={item.submenu}
+                      onClick={() => {
+                        setMenuOpen(false);
+                        onOpen?.();
+                      }}
+                      onTrigger={() => {
+                        setMenuOpen(false);
+                        onOpen?.();
+                      }}
+                    />
+                  ))}
+                </div>
+              ))}
+            </Dropdown>
           </div>
 
           <div className="flex items-center gap-3 rounded-b-[12px] rounded-l-[12px] rounded-tr-[18px] bg-white/[.16] pl-3 pr-4 py-[8px] text-[15px] backdrop-blur-sm tracking-[-0.2px]">
@@ -108,6 +193,8 @@ export function MacDemo({ slots = 4, onOpen, children }: MacDemoProps) {
             <KeySlot key={i} />
           ))}
         </div>
+
+        <ShortcutReminder open={held} symbols={symbols} entries={reminderEntries} />
 
         {children}
       </div>

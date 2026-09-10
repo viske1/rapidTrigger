@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export interface ReminderEntry {
   label: string;
@@ -14,6 +14,11 @@ interface ShortcutReminderProps {
 
 const DURATION = 200;
 
+/** Portion de la combinaison qu'il reste à presser, une fois le préfixe retiré. */
+function remaining(combo: string, symbols: string[]): string {
+  return combo.split(" ").slice(symbols.length).join(" ");
+}
+
 /**
  * Rappel des raccourcis disponibles, en bas à droite de la démo.
  * S'ouvre après un maintien prolongé des modificateurs et liste les
@@ -26,6 +31,16 @@ export function ShortcutReminder({
 }: ShortcutReminderProps) {
   const [mounted, setMounted] = useState(open);
   const [visible, setVisible] = useState(false);
+
+  /*
+   * Au relâchement, `symbols` se vide avant la fermeture du panneau : sans ce
+   * gel, il afficherait « aucun raccourci » pendant son animation de sortie.
+   * On retient donc le dernier contenu non vide — le test porte sur `symbols`
+   * et non sur `open`, qui reste vrai un instant après le relâchement.
+   */
+  const lastContent = useRef({ symbols, entries });
+  if (symbols.length > 0) lastContent.current = { symbols, entries };
+  const shown = symbols.length > 0 ? { symbols, entries } : lastContent.current;
 
   useEffect(() => {
     if (!open) {
@@ -63,26 +78,33 @@ export function ShortcutReminder({
           Raccourcis disponibles
         </span>
         <span className="shrink-0 font-sans text-[13px] text-white/45">
-          {symbols.join(" ")}
+          {shown.symbols.join(" ")}
         </span>
       </div>
 
-      {entries.length === 0 ? (
-        <p className="px-1 py-2 text-[13px] text-white/45">
+      {shown.entries.length === 0 ? (
+        <p className="px-1 py-2 text-[11px] tracking-[-0.1px] text-white/45">
           Aucun raccourci pour cette combinaison.
         </p>
       ) : (
         <ul className="flex flex-col">
-          {entries.map((entry) => (
+          {shown.entries.map((entry) => (
             <li
               key={entry.combo + entry.label}
               className="flex items-center justify-between gap-1 rounded-lg px-1 py-0.5
                 text-[11px] text-white/90"
             >
               <span className="truncate">{entry.label}</span>
-              {/* Même rendu que dans ButtonOptionDropdown : texte simple, pas de <kbd>. */}
-              <span className="shrink-0 font-sans text-white/45">
-                {entry.combo}
+              {/*
+                Même rendu que dans ButtonOptionDropdown : texte simple, pas de <kbd>.
+                Les touches déjà enfoncées restent en gris ; celles qu'il reste
+                à presser scintillent.
+              */}
+              <span className="shrink-0 font-sans">
+                <span className="text-white/45">{shown.symbols.join(" ")}</span>{" "}
+                <span className="shimmer">
+                  {remaining(entry.combo, shown.symbols)}
+                </span>
               </span>
             </li>
           ))}

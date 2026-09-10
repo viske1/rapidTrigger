@@ -22,8 +22,11 @@ interface ModifierHold {
  *
  * Le compte à rebours redémarre à chaque changement de combinaison : ajouter
  * une touche relance l'attente plutôt que de déclencher aussitôt.
+ *
+ * `closeDelay` diffère la fermeture après le relâchement, pour que le panneau
+ * garde son contenu pendant son animation de sortie.
  */
-export function useModifierHold(delay = 1500): ModifierHold {
+export function useModifierHold(delay = 1500, closeDelay = 250): ModifierHold {
   const [pressed, setPressed] = useState<string[]>([]);
   const [held, setHeld] = useState(false);
   const timer = useRef<number>();
@@ -59,17 +62,27 @@ export function useModifierHold(delay = 1500): ModifierHold {
     };
   }, []);
 
-  // Le délai repart de zéro dès que la combinaison change.
+  /*
+   * Le délai repart de zéro dès que la combinaison change, mais une fois
+   * ouvert le panneau ne se referme pas à chaud : relâcher une touche d'une
+   * combinaison à plusieurs modificateurs le laisserait clignoter, et le
+   * relâchement complet le ferait passer par un état vide avant sa sortie.
+   * On laisse donc `held` en place jusqu'à `closeDelay` après le relâchement.
+   */
   useEffect(() => {
+    clearTimeout(timer.current);
+
     if (pressed.length === 0) {
-      setHeld(false);
-      return;
+      timer.current = window.setTimeout(() => setHeld(false), closeDelay);
+      return () => clearTimeout(timer.current);
     }
 
-    setHeld(false);
+    // Ouvert, on y reste : la combinaison affichée suit simplement les touches.
+    if (held) return;
+
     timer.current = window.setTimeout(() => setHeld(true), delay);
     return () => clearTimeout(timer.current);
-  }, [pressed, delay]);
+  }, [pressed, delay, closeDelay, held]);
 
   return {
     held,

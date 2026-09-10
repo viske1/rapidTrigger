@@ -59,6 +59,25 @@
     transform: scale(0.95);
   }
 
+  /*
+   * Shimmer : une bande claire traverse le texte en boucle, pour signaler
+   * les touches qu'il reste à presser. Le dégradé est découpé sur le glyphe
+   * (background-clip: text), donc seul le texte s'éclaire, pas son fond.
+   */
+  .shimmer {
+    background-image: linear-gradient(
+      100deg,
+      rgb(255 255 255 / 0.4) 25%,
+      rgb(255 255 255 / 0.7) 50%,
+      rgb(255 255 255 / 0.4) 75%
+    );
+    background-size: 320% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: shimmer 1.9s linear infinite;
+  }
+
   /* Champs de formulaire */
   .field {
     @apply mt-[5px] w-full rounded-lg border border-line bg-panel2 px-2.5 py-2 font-sans
@@ -71,5 +90,22 @@
   .hover-pop::before {
     transition: none;
     transform: scale(1);
+  }
+}
+
+/*
+ * Le passage occupe le premier tiers du cycle, le reste sert de pause :
+ * la bande traverse vite, puis attend hors champ avant de revenir.
+ */
+@keyframes shimmer {
+  0%   { background-position: 130% 0; }
+  37%  { background-position: -30% 0; }
+  100% { background-position: -30% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shimmer {
+    animation: none;
+    color: rgb(255 255 255 / 0.85);
   }
 }

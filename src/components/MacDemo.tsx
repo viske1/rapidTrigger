@@ -84,8 +84,10 @@ export function MacDemo({ slots = 4, onOpen, children }: MacDemoProps) {
 
     const prefix = symbols.join(" ");
     return MENU_GROUPS.flat()
-      .filter((item): item is { label: string; combo: string } => Boolean(item.combo))
-      .filter(item => item.combo.startsWith(prefix + " "));
+      .filter((item): item is { label: string; combo: string } =>
+        Boolean(item.combo),
+      )
+      .filter((item) => item.combo.startsWith(prefix + " "));
   }, [symbols]);
   const clock = useClock();
 
@@ -181,7 +183,7 @@ export function MacDemo({ slots = 4, onOpen, children }: MacDemoProps) {
               </div>
             </div>
 
-            <span className="font-semibold">{clock}</span>
+            <span className="font-medium">{clock}</span>
           </div>
         </div>
 
@@ -194,7 +196,11 @@ export function MacDemo({ slots = 4, onOpen, children }: MacDemoProps) {
           ))}
         </div>
 
-        <ShortcutReminder open={held} symbols={symbols} entries={reminderEntries} />
+        <ShortcutReminder
+          open={held}
+          symbols={symbols}
+          entries={reminderEntries}
+        />
 
         {children}
       </div>

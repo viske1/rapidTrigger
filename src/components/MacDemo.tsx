@@ -64,15 +64,13 @@ export function MacDemo({ slots = 4, onOpen, children }: MacDemoProps) {
             className="grid h-[30px] w-11 place-items-center rounded-b-[12px] rounded-r-[12px] rounded-tl-[18px] bg-white/[.16] text-[15px]"
           ></span> */}
 
-          <div className="flex items-center gap-3 rounded-b-[12px] rounded-r-[12px] rounded-tl-[18px] bg-white/[.16] pl-3 pr-3 py-[6px] text-[15px] backdrop-blur-sm tracking-[-0.2px]">
+          <div className="flex items-center gap-3 rounded-b-[12px] rounded-r-[12px] rounded-tl-[18px] bg-white/[.16] pl-1 pr-1 py-[4px] text-[15px] backdrop-blur-sm tracking-[-0.2px]">
             <button
               type="button"
               onClick={onOpen}
               aria-label="Ouvrir le centre de contrôle"
-              className="grid h-7 px-2.5 place-items-center rounded-[10px] bg-white/0
-                  transition-colors duration-200 hover:bg-white/15
-                  focus-visible:bg-white/25 focus-visible:outline-none
-                  motion-reduce:transition-none"
+              className="hover-pop grid h-7 place-items-center rounded-b-[9px] rounded-r-[9px] rounded-tl-[14px] px-2.5
+                  focus-visible:outline-none"
             >
               {" "}
               <span className="font-medium">Raccourcis</span>
@@ -85,10 +83,8 @@ export function MacDemo({ slots = 4, onOpen, children }: MacDemoProps) {
                 type="button"
                 onClick={onOpen}
                 aria-label="Ouvrir le centre de contrôle"
-                className="grid h-6 w-6 place-items-center rounded-lg bg-white/0
-                  transition-colors duration-200 hover:bg-white/25
-                  focus-visible:bg-white/25 focus-visible:outline-none
-                  motion-reduce:transition-none"
+                className="hover-pop grid h-6 w-6 place-items-center rounded-lg
+                  focus-visible:outline-none"
               >
                 <LogoIcon className="h-[16px] w-auto" />
               </button>

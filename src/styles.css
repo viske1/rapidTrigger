@@ -31,10 +31,45 @@
            dark:border-line-dark dark:bg-panel-dark;
   }
 
+  /*
+   * Survol par pseudo-élément : ::before réplique le fond du bouton et se met
+   * à l'échelle, plutôt que d'animer le bouton lui-même — l'icône ou le libellé
+   * ne bouge donc pas, et la mise en page reste stable.
+   */
+  .hover-pop {
+    @apply relative isolate;
+  }
+  .hover-pop::before {
+    @apply pointer-events-none absolute inset-0 -z-10 rounded-[inherit]
+           bg-white opacity-0 transition-[transform,opacity] duration-150 ease-out;
+    content: "";
+    transform: scale(0.9);
+  }
+  /*
+   * Ces boutons vivent sur un conteneur déjà en bg-white/[.16] : l'opacité
+   * doit être franche pour que la pastille se détache du fond.
+   */
+  .hover-pop:hover::before,
+  .hover-pop:focus-visible::before {
+    @apply opacity-20;
+    transform: scale(1);
+  }
+  .hover-pop:active::before {
+    @apply opacity-50;
+    transform: scale(0.95);
+  }
+
   /* Champs de formulaire */
   .field {
     @apply mt-[5px] w-full rounded-lg border border-line bg-panel2 px-2.5 py-2 font-sans
            text-[13px] text-content outline-none focus:border-accent
            dark:border-line-dark dark:bg-panel2-dark dark:text-content-dark;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hover-pop::before {
+    transition: none;
+    transform: scale(1);
   }
 }

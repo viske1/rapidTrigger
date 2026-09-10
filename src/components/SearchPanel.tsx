@@ -13,10 +13,7 @@ interface SearchPanelProps {
   onSearchChange: (search: string) => void;
 }
 
-/**
- * Bloc de gauche : recherche plein texte, navigation par portée et compteurs.
- * Remplace Sidebar — les compteurs par portée sont calculés en une passe.
- */
+/** Bloc de gauche : recherche plein texte, navigation par portée et compteurs. */
 export function SearchPanel({
   shortcuts, scope, search, modifiedCount, conflictCount,
   onScopeChange, onSearchChange,
@@ -36,43 +33,54 @@ export function SearchPanel({
     })),
   ];
 
-  return (
-    <aside className="search-panel">
-      <div className="search-wrap">
-        <input
-          type="search"
-          value={search}
-          placeholder="Rechercher un raccourci, une action…"
-          aria-label="Rechercher un raccourci"
-          onChange={e => onSearchChange(e.target.value)}
-        />
-      </div>
+  const stats = [
+    { value: shortcuts.length, label: 'raccourcis' },
+    { value: modifiedCount, label: 'modifiés' },
+    { value: conflictCount, label: 'conflits' },
+  ];
 
-      <nav className="scopes" aria-label="Portées">
-        {entries.map(entry => (
-          <button
-            key={entry.id}
-            type="button"
-            className={`scope-btn ${scope === entry.id ? 'active' : ''}`}
-            aria-current={scope === entry.id ? 'true' : undefined}
-            onClick={() => onScopeChange(entry.id)}
-          >
-            <span>{entry.label}</span>
-            <span className="count">{entry.count}</span>
-          </button>
-        ))}
+  return (
+    <aside className="panel">
+      <input
+        type="search"
+        value={search}
+        placeholder="Rechercher un raccourci, une action…"
+        aria-label="Rechercher un raccourci"
+        onChange={e => onSearchChange(e.target.value)}
+        className="w-full rounded-lg border border-line bg-panel2 px-2.5 py-2 font-sans
+          text-[13px] text-content outline-none focus:border-accent
+          dark:border-line-dark dark:bg-panel2-dark dark:text-content-dark"
+      />
+
+      <nav aria-label="Portées" className="my-3 flex flex-col gap-0.5">
+        {entries.map(entry => {
+          const active = scope === entry.id;
+          return (
+            <button
+              key={entry.id}
+              type="button"
+              aria-current={active ? 'true' : undefined}
+              onClick={() => onScopeChange(entry.id)}
+              className={`flex w-full cursor-pointer items-center justify-between gap-2
+                rounded-[7px] border-none px-2.5 py-[7px] text-left font-sans text-[13px]
+                ${active
+                  ? 'bg-accent-strong text-white'
+                  : 'bg-transparent text-content hover:bg-panel2 dark:text-content-dark dark:hover:bg-panel2-dark'}`}
+            >
+              <span>{entry.label}</span>
+              <span className="text-[11px] opacity-70">{entry.count}</span>
+            </button>
+          );
+        })}
       </nav>
 
-      <div className="search-panel-stats">
-        <div className="stat">
-          <strong>{shortcuts.length}</strong><span>raccourcis</span>
-        </div>
-        <div className="stat">
-          <strong>{modifiedCount}</strong><span>modifiés</span>
-        </div>
-        <div className="stat">
-          <strong>{conflictCount}</strong><span>conflits</span>
-        </div>
+      <div className="flex gap-2 border-t border-line pt-3 dark:border-line-dark">
+        {stats.map(stat => (
+          <div key={stat.label} className="flex-1 text-center">
+            <strong className="block text-lg">{stat.value}</strong>
+            <span className="text-[11px] text-muted dark:text-muted-dark">{stat.label}</span>
+          </div>
+        ))}
       </div>
     </aside>
   );

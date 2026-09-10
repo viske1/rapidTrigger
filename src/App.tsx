@@ -2,11 +2,10 @@ import { useMemo, useState } from 'react';
 import { ShortcutList } from './components/ShortcutList';
 import { ShortcutModal } from './components/ShortcutModal';
 import { MacDemo } from './components/MacDemo';
-// Restructuration de la vue en cours — réactiver ces trois blocs une fois la nouvelle
-// mise en page arrêtée. Les composants sont prêts dans src/components/.
-// import { Header } from './components/Header';
-// import { SearchPanel } from './components/SearchPanel';
-// import { ChangeLog } from './components/ChangeLog';
+import { Modal } from './components/Modal';
+import { Header } from './components/Header';
+import { SearchPanel } from './components/SearchPanel';
+import { ChangeLog } from './components/ChangeLog';
 import { useShortcutCenter } from './lib/useShortcutCenter';
 import { isModified } from './lib/shortcuts';
 import type { ScopeFilter } from './components/types';
@@ -16,8 +15,6 @@ import type { ShortcutDraft, State } from './lib/types';
 type Editing = string | null;
 
 export default function App() {
-  // modifiedCount, clearHistory, setScope, setSearch et les handlers d'export/import/reset
-  // alimentent les blocs Header / SearchPanel / ChangeLog commentés plus bas.
   const {
     state, conflicts, modifiedCount,
     createShortcut, updateShortcut, restoreShortcut, deleteShortcut,
@@ -29,6 +26,7 @@ export default function App() {
   const [onlyModified, setOnlyModified] = useState(false);
   const [onlyConflicts, setOnlyConflicts] = useState(false);
   const [editing, setEditing] = useState<Editing>(null);
+  const [panelOpen, setPanelOpen] = useState(false);
 
   const visible = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -85,38 +83,49 @@ export default function App() {
         onReset={handleReset}
       /> */}
 
-      <MacDemo />
+      <MacDemo onOpen={() => setPanelOpen(true)}>
+        <Modal
+          open={panelOpen}
+          onClose={() => setPanelOpen(false)}
+          label="Centre de contrôle des raccourcis"
+          className="max-w-[82%]"
+          contained
+        >
+          <Header
+            onNew={() => setEditing('')}
+            onExport={handleExport}
+            onImport={handleImport}
+            onReset={handleReset}
+          />
 
-      {/* Vue masquée le temps de la restructuration — seule la maquette est affichée.
-      Réactiver ce bloc avec Header / SearchPanel / ChangeLog.
+          <main className="grid grid-cols-1 items-start gap-4 p-4 xl:grid-cols-[230px_1fr_280px]">
+            <SearchPanel
+              shortcuts={state.shortcuts}
+              scope={scope}
+              search={search}
+              modifiedCount={modifiedCount}
+              conflictCount={conflicts.size}
+              onScopeChange={setScope}
+              onSearchChange={setSearch}
+            />
 
-      <main className="layout">
-         <SearchPanel
-          shortcuts={state.shortcuts}
-          scope={scope}
-          search={search}
-          modifiedCount={modifiedCount}
-          conflictCount={conflicts.size}
-          onScopeChange={setScope}
-          onSearchChange={setSearch}
-        /> 
+            <ShortcutList
+              shortcuts={visible}
+              scope={scope}
+              conflicts={conflicts}
+              onlyModified={onlyModified}
+              onlyConflicts={onlyConflicts}
+              onOnlyModifiedChange={setOnlyModified}
+              onOnlyConflictsChange={setOnlyConflicts}
+              onEdit={setEditing}
+              onRestore={restoreShortcut}
+              onDelete={handleDelete}
+            />
 
-        <ShortcutList
-          shortcuts={visible}
-          scope={scope}
-          conflicts={conflicts}
-          onlyModified={onlyModified}
-          onlyConflicts={onlyConflicts}
-          onOnlyModifiedChange={setOnlyModified}
-          onOnlyConflictsChange={setOnlyConflicts}
-          onEdit={setEditing}
-          onRestore={restoreShortcut}
-          onDelete={handleDelete}
-        />
-
-         <ChangeLog history={state.history} onClear={clearHistory} /> 
-      </main>
-      */}
+            <ChangeLog history={state.history} onClear={clearHistory} />
+          </main>
+        </Modal>
+      </MacDemo>
 
       {editing !== null && (
         <ShortcutModal

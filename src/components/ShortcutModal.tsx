@@ -14,6 +14,8 @@ interface ShortcutModalProps {
   onClose: () => void;
 }
 
+const LABEL = 'mb-3 block text-xs text-muted dark:text-muted-dark';
+
 const DEFAULT_HINT = 'Astuce : cliquez dans le champ et appuyez sur la combinaison souhaitée (ex. ⌘⌥K).';
 
 const TYPE_OPTIONS: { value: ShortcutType; label: string }[] = [
@@ -41,10 +43,13 @@ export function ShortcutModal({
   // Échap ferme la modale, sauf pendant la capture où il efface la combinaison.
   useEffect(() => {
     const onKeyDown = (e: globalThis.KeyboardEvent) => {
-      if (e.key === 'Escape' && !capturing) onClose();
+      if (e.key !== 'Escape' || capturing) return;
+      // Sans cela, la Modal parente se fermerait au même appui.
+      e.stopPropagation();
+      onClose();
     };
-    document.addEventListener('keydown', onKeyDown);
-    return () => document.removeEventListener('keydown', onKeyDown);
+    document.addEventListener('keydown', onKeyDown, true);
+    return () => document.removeEventListener('keydown', onKeyDown, true);
   }, [capturing, onClose]);
 
   function handleCapture(e: KeyboardEvent<HTMLInputElement>) {
@@ -80,35 +85,46 @@ export function ShortcutModal({
   }
 
   return (
-    <div className="modal" onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
-      <div className="modal-card">
-        <h3>{editing ? 'Modifier le raccourci' : 'Nouveau raccourci'}</h3>
+    <div
+      className="fixed inset-0 z-[100] grid place-items-center bg-black/55 p-4"
+      onClick={e => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div
+        className="max-h-[90vh] w-[min(460px,100%)] overflow-auto rounded-xl border border-line
+          bg-panel p-5 dark:border-line-dark dark:bg-panel-dark"
+      >
+        <h3 className="m-0 mb-3.5 text-[15px]">
+          {editing ? 'Modifier le raccourci' : 'Nouveau raccourci'}
+        </h3>
 
         <form onSubmit={handleSubmit}>
-          <label>
+          <label className={LABEL}>
             Nom de l'action
             <input
               required
               autoFocus
               value={draft.name}
+              className="field"
               placeholder="Ouvrir le dossier Projets"
               onChange={e => setDraft(d => ({ ...d, name: e.target.value }))}
             />
           </label>
 
-          <label>
+          <label className={LABEL}>
             Cible (fichier, dossier, application, URL…)
             <input
               required
               value={draft.target}
+              className="field"
               placeholder="~/git/shortcut-center"
               onChange={e => setDraft(d => ({ ...d, target: e.target.value }))}
             />
           </label>
 
-          <label>
+          <label className={LABEL}>
             Type
             <select
+              className="field"
               value={draft.type}
               onChange={e => setDraft(d => ({ ...d, type: e.target.value as ShortcutType }))}
             >
@@ -116,9 +132,10 @@ export function ShortcutModal({
             </select>
           </label>
 
-          <label>
+          <label className={LABEL}>
             Portée
             <select
+              className="field"
               value={draft.scope}
               onChange={e => setDraft(d => ({ ...d, scope: e.target.value as ScopeId }))}
             >
@@ -126,11 +143,11 @@ export function ShortcutModal({
             </select>
           </label>
 
-          <label>
+          <label className={LABEL}>
             Raccourci
             <input
               readOnly
-              className="combo-capture"
+              className="field font-mono tracking-[.06em]"
               autoComplete="off"
               value={draft.combo}
               placeholder="Cliquez puis tapez la combinaison"
@@ -140,11 +157,13 @@ export function ShortcutModal({
             />
           </label>
 
-          <p className={`hint ${hint.error ? 'error' : ''}`}>{hint.text}</p>
+          <p className={`-mt-1.5 mb-3.5 text-[11px] ${hint.error ? 'text-danger' : 'text-muted dark:text-muted-dark'}`}>
+            {hint.text}
+          </p>
 
-          <div className="modal-actions">
+          <div className="mt-1.5 flex justify-end gap-2">
             <button type="button" className="btn" onClick={onClose}>Annuler</button>
-            <button type="submit" className="btn primary">Enregistrer</button>
+            <button type="submit" className="btn btn-primary">Enregistrer</button>
           </div>
         </form>
       </div>

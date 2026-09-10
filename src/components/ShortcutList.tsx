@@ -18,6 +18,8 @@ interface ShortcutListProps {
 
 const ALL_SCOPE = { label: 'Tous les raccourcis', sub: 'Vue complète' };
 
+const CHECKBOX = 'flex cursor-pointer items-center gap-1.5 text-xs text-muted dark:text-muted-dark';
+
 export function ShortcutList({
   shortcuts, scope, conflicts, onlyModified, onlyConflicts,
   onOnlyModifiedChange, onOnlyConflictsChange, onEdit, onRestore, onDelete,
@@ -25,21 +27,22 @@ export function ShortcutList({
   const current = scope === 'all' ? ALL_SCOPE : SCOPES.find(s => s.id === scope) ?? ALL_SCOPE;
 
   return (
-    <section className="content">
-      <div className="content-head">
+    <section className="panel">
+      <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2>{current.label}</h2>
-          <p className="muted scope-sub">{current.sub}</p>
+          <h2 className="m-0 text-[15px]">{current.label}</h2>
+          <p className="mb-0 mt-[3px] text-xs text-muted dark:text-muted-dark">{current.sub}</p>
         </div>
-        <div className="filters">
-          <label className="chk">
+
+        <div className="flex gap-3.5">
+          <label className={CHECKBOX}>
             <input
               type="checkbox"
               checked={onlyModified}
               onChange={e => onOnlyModifiedChange(e.target.checked)}
             /> Modifiés seulement
           </label>
-          <label className="chk">
+          <label className={CHECKBOX}>
             <input
               type="checkbox"
               checked={onlyConflicts}
@@ -50,12 +53,12 @@ export function ShortcutList({
       </div>
 
       {conflicts.size > 0 && (
-        <div className="banner">
+        <div className="mb-3 rounded-lg border border-danger bg-danger/[.12] px-3 py-2 text-xs text-danger">
           ⚠︎ {conflicts.size} raccourcis partagent une même combinaison. Modifiez-en un pour lever le conflit.
         </div>
       )}
 
-      <div className="list">
+      <div className="flex flex-col gap-2">
         {shortcuts.map(s => (
           <ShortcutRow
             key={s.id}
@@ -69,7 +72,9 @@ export function ShortcutList({
       </div>
 
       {shortcuts.length === 0 && (
-        <p className="empty">Aucun raccourci ne correspond à votre recherche.</p>
+        <p className="py-[30px] text-center text-muted dark:text-muted-dark">
+          Aucun raccourci ne correspond à votre recherche.
+        </p>
       )}
     </section>
   );

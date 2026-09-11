@@ -9,6 +9,11 @@ interface DropdownProps {
   align?: "left" | "right";
   /** Largeur et autres utilitaires du panneau. */
   className?: string;
+  /**
+   * « menu » reprend le fond sombre de la barre macOS ; « surface » suit le
+   * thème de l'application, pour un menu ouvert dans l'interface.
+   */
+  variant?: "menu" | "surface";
 }
 
 /** Durée des transitions, à garder en phase avec duration-150 ci-dessous. */
@@ -25,6 +30,7 @@ export function Dropdown({
   children,
   align = "left",
   className = "w-64",
+  variant = "menu",
 }: DropdownProps) {
   const [mounted, setMounted] = useState(open);
   const [visible, setVisible] = useState(false);
@@ -87,8 +93,13 @@ export function Dropdown({
       ref={panelRef}
       role="menu"
       className={`absolute top-full z-50 mt-1.5 ${align === "right" ? "right-0" : "left-0"}
-        ${className} origin-top overflow-hidden rounded-[16px] border border-white/10
-        bg-[#2b2b2e]/70 p-1.5 shadow-screen backdrop-blur-2xl backdrop-saturate-150
+        ${className} origin-top overflow-hidden rounded-[16px] p-1.5 shadow-screen
+        backdrop-blur-2xl backdrop-saturate-150
+        ${
+          variant === "menu"
+            ? "border border-white/10 bg-[#2b2b2e]/70"
+            : "border border-line/70 bg-panel/90 dark:border-line-dark/70 dark:bg-panel-dark/90"
+        }
         transition-[opacity,transform] duration-150 ease-out motion-reduce:transition-none
         ${visible ? "scale-100 opacity-100" : "scale-95 opacity-0"}`}
     >

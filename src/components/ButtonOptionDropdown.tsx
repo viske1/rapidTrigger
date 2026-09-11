@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { ReactNode } from "react";
 import { useMetaKey } from "../lib/useMetaKey";
 import { PlusIcon } from "./icons/PlusIcon";
 import { PencilIcon } from "./icons/PencilIcon";
@@ -10,6 +11,10 @@ interface ButtonOptionDropdownProps {
   /** Affiche un chevron de sous-menu à la place de la combinaison. */
   submenu?: boolean;
   disabled?: boolean;
+  /** Icône affichée devant le libellé. */
+  icon?: ReactNode;
+  /** Doit suivre la variante du Dropdown qui contient l'entrée. */
+  variant?: "menu" | "surface";
   onClick?: () => void;
   /**
    * Ouvre l'interface Rapid Trigger pour ce raccourci.
@@ -30,6 +35,8 @@ export function ButtonOptionDropdown({
   combo,
   submenu = false,
   disabled = false,
+  icon,
+  variant = "menu",
   onClick,
   onTrigger,
 }: ButtonOptionDropdownProps) {
@@ -58,12 +65,28 @@ export function ButtonOptionDropdown({
       onMouseLeave={() => setHovered(false)}
       onFocus={() => setHovered(true)}
       onBlur={() => setHovered(false)}
-      className="flex w-full items-center justify-between gap-6 rounded-[10px] px-2 py-[4px]
-        text-left font-regular tracking-[-0.1px] text-[13px] text-white/90 transition-colors duration-100
-        hover:bg-white/15 focus-visible:bg-white/15 focus-visible:outline-none
-        disabled:pointer-events-none disabled:opacity-40 motion-reduce:transition-none"
+      className={`flex w-full items-center justify-between gap-6 rounded-[10px] px-2 py-[4px]
+        text-left font-regular tracking-[-0.1px] text-[13px] transition-colors duration-100
+        focus-visible:outline-none
+        ${
+          variant === "menu"
+            ? "text-white/90 hover:bg-white/15 focus-visible:bg-white/15"
+            : "text-content hover:bg-black/[.06] focus-visible:bg-black/[.06] dark:text-content-dark dark:hover:bg-white/[.08] dark:focus-visible:bg-white/[.08]"
+        }
+        disabled:pointer-events-none disabled:opacity-40 motion-reduce:transition-none`}
     >
-      <span className="truncate">{label}</span>
+      <span className="flex min-w-0 items-center gap-2">
+        {icon && (
+          <span
+            className={`shrink-0 ${
+              variant === "menu" ? "text-white/60" : "text-content/55 dark:text-content-dark/55"
+            }`}
+          >
+            {icon}
+          </span>
+        )}
+        <span className="truncate">{label}</span>
+      </span>
 
       {submenu ? (
         <span aria-hidden="true" className="shrink-0 text-white/50">

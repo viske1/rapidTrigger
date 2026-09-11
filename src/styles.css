@@ -41,9 +41,21 @@
   }
   .hover-pop::before {
     @apply pointer-events-none absolute inset-0 -z-10 rounded-[inherit]
-           bg-white opacity-0 transition-[transform,opacity] duration-150 ease-out;
+           opacity-0 transition-[transform,opacity] duration-150 ease-out;
     content: "";
+    /* Blanc par défaut (barre macOS) ; surchargeable sur fond clair. */
+    background-color: var(--hover-pop-color, #fff);
     transform: scale(0.9);
+  }
+
+  /* Pastille sombre sur les surfaces claires, et l'inverse en thème sombre. */
+  .hover-pop-surface {
+    --hover-pop-color: #000;
+  }
+  @media (prefers-color-scheme: dark) {
+    .hover-pop-surface {
+      --hover-pop-color: #fff;
+    }
   }
   /*
    * Ces boutons vivent sur un conteneur déjà en bg-white/[.16] : l'opacité

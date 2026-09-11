@@ -6,17 +6,14 @@ import type { ScopeFilter } from './types';
 interface SearchPanelProps {
   shortcuts: Shortcut[];
   scope: ScopeFilter;
-  search: string;
   modifiedCount: number;
   conflictCount: number;
   onScopeChange: (scope: ScopeFilter) => void;
-  onSearchChange: (search: string) => void;
 }
 
 /** Bloc de gauche : recherche plein texte, navigation par portée et compteurs. */
 export function SearchPanel({
-  shortcuts, scope, search, modifiedCount, conflictCount,
-  onScopeChange, onSearchChange,
+  shortcuts, scope, modifiedCount, conflictCount, onScopeChange,
 }: SearchPanelProps) {
   const countByScope = useMemo(() => {
     const counts = new Map<string, number>();
@@ -41,18 +38,8 @@ export function SearchPanel({
 
   return (
     <aside className="panel">
-      <input
-        type="search"
-        value={search}
-        placeholder="Rechercher un raccourci, une action…"
-        aria-label="Rechercher un raccourci"
-        onChange={e => onSearchChange(e.target.value)}
-        className="w-full rounded-lg border border-line bg-panel2 px-2.5 py-2 font-sans
-          text-[13px] text-content outline-none focus:border-accent
-          dark:border-line-dark dark:bg-panel2-dark dark:text-content-dark"
-      />
-
-      <nav aria-label="Portées" className="my-3 flex flex-col gap-0.5">
+      {/* La recherche a rejoint le Header ; ce panneau ne garde que les portées. */}
+      <nav aria-label="Portées" className="mb-3 flex flex-col gap-0.5">
         {entries.map(entry => {
           const active = scope === entry.id;
           return (

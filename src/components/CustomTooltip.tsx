@@ -22,7 +22,9 @@ interface CustomTooltipProps {
   checkTruncation?: boolean;
   /** Sélecteur de l'élément dont mesurer la troncature, cherché dans le déclencheur. */
   truncationSelector?: string;
-  showDelay?: number;
+  /** Délai avant affichage au survol, en millisecondes. */
+  delay?: number;
+  /** Délai avant disparition une fois le survol quitté. */
   hideDelay?: number;
   disabled?: boolean;
   /** Autorise le retour à la ligne, pour les contenus longs. */
@@ -32,7 +34,14 @@ interface CustomTooltipProps {
 
 const GAP = 8;
 
-/** Ancrage dans le déclencheur, et transformation appliquée à l'infobulle. */
+/** Durée des transitions, à garder en phase avec duration-[175ms] ci-dessous. */
+const DURATION = 100;
+
+/**
+ * Ancrage dans le déclencheur, et transformation appliquée à l'infobulle.
+ * L'origine du scale reste au centre (défaut CSS) : elle n'est donc pas
+ * redéfinie par position.
+ */
 const ANCHORS: Record<
   TooltipPosition,
   {
@@ -45,8 +54,8 @@ const ANCHORS: Record<
     x: (r) => r.left + r.width / 2,
     y: (r) => r.top,
     style: {
+      transformOrigin: "bottom center",
       transform: "translateX(-50%) translateY(-100%)",
-      transformOrigin: "center bottom",
       marginTop: -GAP,
     },
   },
@@ -54,8 +63,8 @@ const ANCHORS: Record<
     x: (r) => r.left,
     y: (r) => r.top,
     style: {
+      transformOrigin: "bottom left",
       transform: "translateY(-100%)",
-      transformOrigin: "left bottom",
       marginTop: -GAP,
     },
   },
@@ -63,8 +72,8 @@ const ANCHORS: Record<
     x: (r) => r.right,
     y: (r) => r.top,
     style: {
+      transformOrigin: "bottom right",
       transform: "translateX(-100%) translateY(-100%)",
-      transformOrigin: "right bottom",
       marginTop: -GAP,
     },
   },
@@ -72,22 +81,26 @@ const ANCHORS: Record<
     x: (r) => r.left + r.width / 2,
     y: (r) => r.bottom,
     style: {
+      transformOrigin: "top center",
       transform: "translateX(-50%)",
-      transformOrigin: "center top",
       marginTop: GAP,
     },
   },
   "bottom-left": {
     x: (r) => r.left,
     y: (r) => r.bottom,
-    style: { transform: "none", transformOrigin: "left top", marginTop: GAP },
+    style: {
+      transformOrigin: "top left",
+      transform: "",
+      marginTop: GAP,
+    },
   },
   "bottom-right": {
     x: (r) => r.right,
     y: (r) => r.bottom,
     style: {
+      transformOrigin: "top right",
       transform: "translateX(-100%)",
-      transformOrigin: "right top",
       marginTop: GAP,
     },
   },
@@ -95,8 +108,8 @@ const ANCHORS: Record<
     x: (r) => r.left,
     y: (r) => r.top + r.height / 2,
     style: {
-      transform: "translateX(-100%) translateY(-50%)",
       transformOrigin: "right center",
+      transform: "translateX(-100%) translateY(-50%)",
       marginLeft: -GAP,
     },
   },
@@ -104,8 +117,8 @@ const ANCHORS: Record<
     x: (r) => r.right,
     y: (r) => r.top + r.height / 2,
     style: {
-      transform: "translateY(-50%)",
       transformOrigin: "left center",
+      transform: "translateY(-50%)",
       marginLeft: GAP,
     },
   },
@@ -116,7 +129,7 @@ const ANCHORS: Record<
  * `overflow-hidden` de la page.
  *
  * Passer d'un déclencheur à un autre bascule sans animation ni délai : seule
- * la première apparition d'une série attend `showDelay`.
+ * la première apparition d'une série attend `delay`.
  */
 let activeTooltip: string | null = null;
 const listeners = new Map<string, () => void>();
@@ -127,8 +140,8 @@ export function CustomTooltip({
   position = "top",
   checkTruncation = false,
   truncationSelector,
-  showDelay = 300,
-  hideDelay = 300,
+  delay = 0,
+  hideDelay = 0,
   disabled = false,
   wrap = false,
   children,
@@ -139,17 +152,21 @@ export function CustomTooltip({
   const hideTimer = useRef<number>();
 
   const [visible, setVisible] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const [shown, setShown] = useState(false);
   const [skipAnimation, setSkipAnimation] = useState(false);
   const [coords, setCoords] = useState({ x: 0, y: 0 });
 
   const hasContent = Boolean(text) || content !== undefined;
 
+  // Fermeture immédiate, sans transition : utilisée quand une autre infobulle
+  // prend la main, où laisser celle-ci s'animer la ferait traîner.
   const close = useCallback(() => {
     clearTimeout(showTimer.current);
     clearTimeout(hideTimer.current);
     setVisible(false);
     setShown(false);
+    setMounted(false);
     if (activeTooltip === id) activeTooltip = null;
   }, [id]);
 
@@ -164,12 +181,20 @@ export function CustomTooltip({
     };
   }, [id, close]);
 
-  // Monte d'abord à l'état fermé, puis bascule une fois peint.
+  // Monte d'abord à l'état fermé, puis bascule une fois peint. À la
+  // fermeture, l'élément reste monté le temps de la transition de sortie.
   useEffect(() => {
     if (!visible) {
       setShown(false);
-      return;
+      if (skipAnimation) {
+        setMounted(false);
+        return;
+      }
+      const timer = setTimeout(() => setMounted(false), DURATION);
+      return () => clearTimeout(timer);
     }
+
+    setMounted(true);
     if (skipAnimation) {
       setShown(true);
       return;
@@ -227,7 +252,7 @@ export function CustomTooltip({
       place();
       setVisible(true);
       activeTooltip = id;
-    }, showDelay);
+    }, delay);
   }
 
   function handleLeave() {
@@ -250,7 +275,7 @@ export function CustomTooltip({
     >
       {children}
 
-      {visible &&
+      {mounted &&
         createPortal(
           <div
             role="tooltip"
@@ -262,17 +287,23 @@ export function CustomTooltip({
               maxWidth: 300,
               willChange: "transform, opacity",
               ...ANCHORS[position].style,
-              // `scale` est distinct de `transform` : les deux cohabitent sans
-              // que l'animation n'écrase la transformation d'ancrage.
-              scale: shown ? "1" : "0.95",
+              /*
+               * L'échelle est composée dans `transform`, après le translate
+               * d'ancrage : la propriété `scale`, elle, s'applique AVANT lui,
+               * si bien que le décalage se retrouvait mis à l'échelle et que
+               * l'infobulle glissait latéralement en grandissant.
+               */
+              transform: `${ANCHORS[position].style.transform ?? ""} scale(${
+                shown ? 1 : 0.85
+              })`.trim(),
             }}
             className={`pointer-events-none z-[10000] inline-block rounded-[12px]
-            bg-black/60 px-3 py-1.5 text-[12px] font-medium
+            bg-black/55 px-3 py-1.5 text-[12px] font-medium
             tracking-[-0.1px] text-white backdrop-blur-lg
             shadow-[0_5px_8px_-2px_rgba(0,0,0,0.4)]
             ${wrap ? "whitespace-pre-line text-left" : "whitespace-nowrap"}
-            ${skipAnimation ? "" : "transition-[opacity,filter,scale] duration-150 ease-in-out"}
-            ${shown ? "opacity-100 blur-0" : "opacity-0 blur-[1px]"}
+            ${skipAnimation ? "" : "transition-[opacity,transform] duration-[175ms] ease-out"}
+            ${shown ? "opacity-100" : "opacity-0"}
             motion-reduce:transition-none`}
           >
             {content ?? text}

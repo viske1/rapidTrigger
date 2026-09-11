@@ -4,7 +4,7 @@ import { useMetaKey } from "../lib/useMetaKey";
 import { PlusIcon } from "./icons/PlusIcon";
 import { PencilIcon } from "./icons/PencilIcon";
 
-interface ButtonOptionDropdownProps {
+interface ButtonOptionInterfaceProps {
   label: string;
   /** Combinaison affichée à droite, ex. « ⌘ Z ». */
   combo?: string;
@@ -28,7 +28,7 @@ interface ButtonOptionDropdownProps {
  * déclencheur « Créer » / « Modifier » qui ouvre Rapid Trigger : les deux
  * se croisent au même emplacement en fade + scale inversés.
  */
-export function ButtonOptionDropdown({
+export function ButtonOptionInterface({
   label,
   combo,
   submenu = false,
@@ -36,7 +36,7 @@ export function ButtonOptionDropdown({
   icon,
   onClick,
   onTrigger,
-}: ButtonOptionDropdownProps) {
+}: ButtonOptionInterfaceProps) {
   const [hovered, setHovered] = useState(false);
   const metaDown = useMetaKey();
 
@@ -65,14 +65,13 @@ export function ButtonOptionDropdown({
       className={`flex w-full items-center justify-between gap-6 rounded-[10px] px-2 py-[4px]
         text-left font-regular tracking-[-0.1px] text-[13px] transition-colors duration-100
         focus-visible:outline-none
-        text-white/90 hover:bg-white/15 focus-visible:bg-white/15
+        text-content hover:bg-black/[.06] focus-visible:bg-black/[.06]
+        dark:text-content-dark dark:hover:bg-white/[.08] dark:focus-visible:bg-white/[.08]
         disabled:pointer-events-none disabled:opacity-40 motion-reduce:transition-none`}
     >
       <span className="flex min-w-0 items-center gap-2">
         {icon && (
-          <span
-            className="shrink-0 text-white/60"
-          >
+          <span className="shrink-0 text-content/55 dark:text-content-dark/55">
             {icon}
           </span>
         )}
@@ -131,6 +130,6 @@ export function ButtonOptionDropdown({
 }
 
 /** Trait de séparation entre deux groupes d'entrées. */
-export function DropdownSeparator() {
+export function DropdownInterfaceSeparator() {
   return <hr className="my-1.5 border-0 border-t border-white/10" />;
 }

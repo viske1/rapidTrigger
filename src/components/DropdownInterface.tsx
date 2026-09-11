@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 
-interface DropdownProps {
+interface DropdownInterfaceProps {
   open: boolean;
   onClose: () => void;
   children: ReactNode;
@@ -15,19 +15,20 @@ interface DropdownProps {
 const DURATION = 150;
 
 /**
- * Menu déroulant de la barre macOS : positionné sous son déclencheur, animé
- * en fade + scale depuis le haut. Le contenu est libre (slot).
+ * Menu déroulant de l'interface : positionné sous son déclencheur, animé en
+ * fade + scale depuis le haut. Le contenu est libre (slot).
  * Le parent doit porter `relative`.
  *
- * Voir DropdownInterface pour le jumeau qui s'ouvre dans l'interface.
+ * Jumeau de Dropdown, qui sert lui à la barre de menu de la maquette macOS
+ * et garde son fond sombre. Les deux évoluent séparément.
  */
-export function Dropdown({
+export function DropdownInterface({
   open,
   onClose,
   children,
   align = "left",
   className = "w-64",
-}: DropdownProps) {
+}: DropdownInterfaceProps) {
   const [mounted, setMounted] = useState(open);
   const [visible, setVisible] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -90,8 +91,8 @@ export function Dropdown({
       role="menu"
       className={`absolute top-full z-50 mt-1.5 ${align === "right" ? "right-0" : "left-0"}
         ${className} origin-top overflow-hidden rounded-[16px] p-1.5 shadow-screen
-        backdrop-blur-2xl backdrop-saturate-150
-        border border-white/10 bg-[#2b2b2e]/70
+        backdrop-blur-[10px] backdrop-saturate-150
+        border-[1px] border-line/70 bg-panel/90 dark:border-line-dark/70 dark:bg-black/50
         transition-[opacity,transform] duration-150 ease-out motion-reduce:transition-none
         ${visible ? "scale-100 opacity-100" : "scale-95 opacity-0"}`}
     >

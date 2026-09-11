@@ -24,7 +24,10 @@ const DURATION = 200;
  * Reste montée le temps de l'animation de sortie avant d'être retirée du DOM.
  */
 export function Modal({
-  open, onClose, children, label,
+  open,
+  onClose,
+  children,
+  label,
   className = "max-w-3xl",
   contained = false,
 }: ModalProps) {
@@ -87,10 +90,11 @@ export function Modal({
       className={`${contained ? "absolute" : "fixed"} inset-0 z-[100] flex items-center justify-center p-4
         transition-opacity duration-200 ease-out
         ${visible ? "opacity-100" : "opacity-0"}`}
-      onClick={e => {
+      onClick={(e) => {
         // Le panneau arrête la propagation : tout clic qui remonte jusqu'ici
         // vient donc de l'extérieur (conteneur ou fond assombri).
-        if (e.target === e.currentTarget || e.target === backdropRef.current) onClose();
+        if (e.target === e.currentTarget || e.target === backdropRef.current)
+          onClose();
       }}
     >
       <div
@@ -104,12 +108,12 @@ export function Modal({
         ref={panelRef}
         role="dialog"
         aria-modal="true"
-        onClick={e => e.stopPropagation()}
+        onClick={(e) => e.stopPropagation()}
         aria-label={label}
         tabIndex={-1}
         className={`relative ${contained ? "max-h-[78%]" : "max-h-[90vh]"} w-full ${className}
-          overflow-auto rounded-2xl
-          border border-white/10 bg-panel-dark shadow-screen outline-none
+          overflow-auto rounded-[24px]
+          border border-white/10 bg-black/60 shadow-screen outline-none backdrop-blur-md
           transition-all duration-200 ease-out motion-reduce:transition-none
           ${visible ? "scale-100 opacity-100 blur-0" : "scale-95 opacity-0 blur-sm"}`}
       >

@@ -1,8 +1,8 @@
 import { useRef, useState } from "react";
 import { IconButton } from "./IconButton";
 import { CustomTooltip } from "./CustomTooltip";
-import { Dropdown } from "./Dropdown";
-import { ButtonOptionDropdown } from "./ButtonOptionDropdown";
+import { DropdownInterface } from "./DropdownInterface";
+import { ButtonOptionInterface } from "./ButtonOptionInterface";
 import { PlusIcon } from "./icons/PlusIcon";
 import { HistoryIcon } from "./icons/HistoryIcon";
 import { MoreVertIcon } from "./icons/MoreVertIcon";
@@ -57,18 +57,23 @@ export function Header({
         </IconButton>
       </CustomTooltip>
 
-      <IconButton
-        label="Historique des modifications"
-        onClick={onToggleHistory}
-        aria-pressed={historyOpen}
-        className={
-          historyOpen
-            ? "bg-black/[.09] text-content dark:bg-white/[.12] dark:text-content-dark"
-            : ""
-        }
+      <CustomTooltip
+        text={historyOpen ? "Masquer l'historique" : "Historique des modifications"}
+        position="bottom"
       >
-        <HistoryIcon className="h-[14px] w-[14px]" />
-      </IconButton>
+        <IconButton
+          label="Historique des modifications"
+          onClick={onToggleHistory}
+          aria-pressed={historyOpen}
+          className={
+            historyOpen
+              ? "bg-black/[.09] text-content dark:bg-white/[.12] dark:text-content-dark"
+              : ""
+          }
+        >
+          <HistoryIcon className="h-[14px] w-[14px]" />
+        </IconButton>
+      </CustomTooltip>
 
       {/* Ancre du menu : le Dropdown se positionne sur ce parent. */}
       <div className="relative">
@@ -82,41 +87,37 @@ export function Header({
           <MoreVertIcon className="h-[14px] w-[14px]" />
         </IconButton>
 
-        <Dropdown
+        <DropdownInterface
           open={menuOpen}
           onClose={() => setMenuOpen(false)}
           align="right"
-          variant="surface"
           className="w-[200px]"
         >
-          <ButtonOptionDropdown
+          <ButtonOptionInterface
             label="Exporter"
-            variant="surface"
-            icon={<DownloadIcon className="h-4 w-4" />}
+              icon={<DownloadIcon className="h-4 w-4" />}
             onClick={() => {
               setMenuOpen(false);
               onExport();
             }}
           />
-          <ButtonOptionDropdown
+          <ButtonOptionInterface
             label="Importer"
-            variant="surface"
-            icon={<UploadIcon className="h-4 w-4" />}
+              icon={<UploadIcon className="h-4 w-4" />}
             onClick={() => {
               setMenuOpen(false);
               fileInput.current?.click();
             }}
           />
-          <ButtonOptionDropdown
+          <ButtonOptionInterface
             label="Réinitialiser"
-            variant="surface"
-            icon={<AutorenewIcon className="h-4 w-4" />}
+              icon={<AutorenewIcon className="h-4 w-4" />}
             onClick={() => {
               setMenuOpen(false);
               onReset();
             }}
           />
-        </Dropdown>
+        </DropdownInterface>
       </div>
 
       <input

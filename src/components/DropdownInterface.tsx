@@ -90,9 +90,9 @@ export function DropdownInterface({
       ref={panelRef}
       role="menu"
       className={`absolute top-full z-50 mt-1.5 ${align === "right" ? "right-0" : "left-0"}
-        ${className} origin-top overflow-hidden rounded-[16px] p-1.5 shadow-screen
+        ${className} origin-top rounded-[16px] p-1.5 shadow-menu
         backdrop-blur-[10px] backdrop-saturate-150
-        border-[1px] border-line/70 bg-panel/90 dark:border-line-dark/70 dark:bg-black/50
+        border-gradient bg-panel/90 dark:bg-black/50
         transition-[opacity,transform] duration-150 ease-out motion-reduce:transition-none
         ${visible ? "scale-100 opacity-100" : "scale-95 opacity-0"}`}
     >

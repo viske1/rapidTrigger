@@ -64,7 +64,7 @@ export function ButtonOptionInterface({
       onBlur={() => setHovered(false)}
       className={`flex w-full items-center justify-between gap-6 rounded-[10px] px-2 py-[4px]
         text-left font-regular tracking-[-0.1px] text-[13px] transition-colors duration-100
-        focus-visible:outline-none
+        focus-visible:outline-none 
         text-content hover:bg-black/[.06] focus-visible:bg-black/[.06]
         dark:text-content-dark dark:hover:bg-white/[.08] dark:focus-visible:bg-white/[.08]
         disabled:pointer-events-none disabled:opacity-40 motion-reduce:transition-none`}

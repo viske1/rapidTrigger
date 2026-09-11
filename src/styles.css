@@ -90,6 +90,40 @@
     animation: shimmer 1.9s linear infinite;
   }
 
+  .shadow-menu {
+    box-shadow: 0px 8px 16px 8px rgba(0, 0, 0, 0.4);
+  }
+
+  /*
+   * Bordure en dégradé : CSS ne sait pas dégrader une `border`, donc un
+   * pseudo-élément peint le dégradé sur tout le pourtour, puis deux masques
+   * superposés en `xor` n'en gardent que l'épaisseur du trait.
+   */
+  .border-gradient {
+    position: relative;
+  }
+  .border-gradient::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(
+      180deg,
+      rgb(255 255 255 / 0.14),
+      rgb(255 255 255 / 0.08)
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
   /* Champs de formulaire */
   .field {
     @apply mt-[5px] w-full rounded-lg border border-line bg-panel2 px-2.5 py-2 font-sans
@@ -110,9 +144,15 @@
  * la bande traverse vite, puis attend hors champ avant de revenir.
  */
 @keyframes shimmer {
-  0%   { background-position: 130% 0; }
-  37%  { background-position: -30% 0; }
-  100% { background-position: -30% 0; }
+  0% {
+    background-position: 130% 0;
+  }
+  37% {
+    background-position: -30% 0;
+  }
+  100% {
+    background-position: -30% 0;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

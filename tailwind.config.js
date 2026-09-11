@@ -22,8 +22,12 @@ export default {
       },
       boxShadow: {
         screen: '0 24px 60px rgba(0,0,0,.35)',
-        key: '0 4px 0 #000',
-        'key-pressed': '0 1px 0 #000',
+        /*
+         * Menu déroulant : le panneau se pose sur une surface presque noire,
+         * où une ombre noire ne se distingue pas. Elle est donc doublée d'un
+         * liseré clair qui détache le bord, puis d'une diffusion profonde.
+         */
+        menu: '0 0 0 1px rgba(255,255,255,.06), 0 2px 6px rgba(0,0,0,.6), 0 16px 32px rgba(0,0,0,.75), 0 40px 80px rgba(0,0,0,.85)',
       },
     },
   },

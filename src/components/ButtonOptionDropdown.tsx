@@ -69,13 +69,7 @@ export function ButtonOptionDropdown({
         disabled:pointer-events-none disabled:opacity-40 motion-reduce:transition-none`}
     >
       <span className="flex min-w-0 items-center gap-2">
-        {icon && (
-          <span
-            className="shrink-0 text-white/60"
-          >
-            {icon}
-          </span>
-        )}
+        {icon && <span className="shrink-0 text-white/60">{icon}</span>}
         <span className="truncate">{label}</span>
       </span>
 
@@ -109,7 +103,7 @@ export function ButtonOptionDropdown({
           <span
             aria-hidden={!triggering}
             aria-label={combo ? "Modifier le raccourci" : "Créer un raccourci"}
-            className={` hover-pop col-start-1 row-start-1 grid h-6 w-6 place-items-center translate-x-1
+            className={` hover-pop col-start-1 row-start-1 grid h-6 w-6 place-items-center translate-x-1 backdrop-blur-md
               rounded-lg  text-white/90
               transition-[opacity,transform,filter] duration-100 ease-out motion-reduce:transition-none
               ${

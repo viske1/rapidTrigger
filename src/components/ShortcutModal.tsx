@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { FormEvent, KeyboardEvent } from "react";
+import { ModalInterface, holdEscape } from "./ModalInterface";
 import { SCOPES } from "../lib/data";
 import { comboFromEvent } from "../lib/keys";
 import type {
@@ -11,6 +12,7 @@ import type {
 import type { ScopeFilter } from "./types";
 
 interface ShortcutModalProps {
+  open: boolean;
   /** Raccourci à modifier, ou null pour une création. */
   editing: Shortcut | null;
   shortcuts: Shortcut[];
@@ -34,6 +36,7 @@ const TYPE_OPTIONS: { value: ShortcutType; label: string }[] = [
 ];
 
 export function ShortcutModal({
+  open,
   editing,
   shortcuts,
   currentScope,
@@ -50,17 +53,15 @@ export function ShortcutModal({
   const [hint, setHint] = useState({ text: DEFAULT_HINT, error: false });
   const [capturing, setCapturing] = useState(false);
 
-  // Échap ferme la modale, sauf pendant la capture où il efface la combinaison.
+  /*
+   * ModalInterface ferme déjà sur Échap. Pendant la capture, la touche doit
+   * au contraire effacer la combinaison : on intercepte alors l'évènement en
+   * amont pour qu'il n'atteigne pas la modale.
+   */
   useEffect(() => {
-    const onKeyDown = (e: globalThis.KeyboardEvent) => {
-      if (e.key !== "Escape" || capturing) return;
-      // Sans cela, la Modal parente se fermerait au même appui.
-      e.stopPropagation();
-      onClose();
-    };
-    document.addEventListener("keydown", onKeyDown, true);
-    return () => document.removeEventListener("keydown", onKeyDown, true);
-  }, [capturing, onClose]);
+    if (!capturing) return;
+    return holdEscape();
+  }, [capturing]);
 
   function handleCapture(e: KeyboardEvent<HTMLInputElement>) {
     e.preventDefault();
@@ -108,16 +109,14 @@ export function ShortcutModal({
   }
 
   return (
-    <div
-      className="fixed inset-0 z-[100] grid place-items-center bg-black/55 p-4"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
+    <ModalInterface
+      open={open}
+      onClose={onClose}
+      label={editing ? "Modifier le raccourci" : "Nouveau raccourci"}
+      className="max-w-[460px]"
+      height="auto"
     >
-      <div
-        className="max-h-[90vh] w-[min(460px,100%)] overflow-auto rounded-xl border border-line
-          bg-panel p-5 dark:border-line-dark dark:bg-panel-dark"
-      >
+      <div className="overflow-auto p-5">
         <h3 className="m-0 mb-3.5 text-[15px]">
           {editing ? "Modifier le raccourci" : "Nouveau raccourci"}
         </h3>
@@ -217,6 +216,6 @@ export function ShortcutModal({
           </div>
         </form>
       </div>
-    </div>
+    </ModalInterface>
   );
 }

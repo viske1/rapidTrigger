@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import type { ReactNode } from "react";
 
-interface ModalProps {
+interface ModalInterfaceProps {
   open: boolean;
   onClose: () => void;
   children: ReactNode;
@@ -10,15 +10,16 @@ interface ModalProps {
   /** Largeur maximale du panneau. */
   className?: string;
   /**
-   * Confine la modale à son parent positionné plutôt qu'à la fenêtre.
-   * Le parent doit porter `relative` et `overflow-hidden`.
-   */
-  contained?: boolean;
-  /**
    * « fill » occupe la hauteur disponible (défaut, pour un panneau plein) ;
    * « auto » s'ajuste au contenu, pour une boîte de dialogue courte.
    */
   height?: "fill" | "auto";
+  /**
+   * « stable » place la modale au tiers supérieur plutôt qu'au centre : un
+   * contenu qui se déploie l'agrandit alors vers le bas, sans décaler ce qui
+   * le précède comme le ferait un centrage recalculé.
+   */
+  anchor?: "center" | "stable";
 }
 
 /** Durée des transitions, à garder en phase avec les classes duration-200 ci-dessous. */
@@ -30,19 +31,38 @@ const DURATION = 200;
  */
 const stack: string[] = [];
 
-/**
- * Modale générique : fond assombri et flouté, panneau en fade + scale.
- * Reste montée le temps de l'animation de sortie avant d'être retirée du DOM.
+/*
+ * Un champ peut avoir besoin d'Échap pour son propre usage — effacer une
+ * combinaison en cours de capture, par exemple. Il le signale ici, et la
+ * modale laisse alors passer la touche sans se fermer.
  */
-export function Modal({
+let escapeHeldBy = 0;
+
+/** À appeler tant qu'un champ capture Échap pour son propre compte. */
+export function holdEscape(): () => void {
+  escapeHeldBy += 1;
+  return () => {
+    escapeHeldBy -= 1;
+  };
+}
+
+/**
+ * Modale de l'interface : fond assombri, panneau en fade + scale. Toujours
+ * confinée à son parent positionné, qui doit porter `relative` et
+ * `overflow-hidden` — l'assombrissement ne déborde donc pas sur la maquette.
+ *
+ * Jumelle de Modal, qui sert au panneau ouvert depuis la barre macOS et peut
+ * couvrir la fenêtre entière. Les deux évoluent séparément.
+ */
+export function ModalInterface({
   open,
   onClose,
   children,
   label,
   className = "max-w-3xl",
-  contained = false,
   height = "fill",
-}: ModalProps) {
+  anchor = "center",
+}: ModalInterfaceProps) {
   const id = useId();
   const [mounted, setMounted] = useState(open);
   const [visible, setVisible] = useState(false);
@@ -72,14 +92,14 @@ export function Modal({
     };
   }, [open]);
 
-  // Échap ferme, et le défilement de la page est gelé tant que la modale est ouverte.
+  // Échap ferme la modale du dessus de la pile.
   useEffect(() => {
     if (!open) return;
 
     stack.push(id);
 
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key !== "Escape") return;
+      if (e.key !== "Escape" || escapeHeldBy > 0) return;
       // Seule la modale au sommet de la pile se ferme.
       if (stack[stack.length - 1] !== id) return;
       onClose();
@@ -88,28 +108,22 @@ export function Modal({
 
     panelRef.current?.focus();
 
-    if (contained) {
-      return () => {
-        document.removeEventListener("keydown", onKeyDown);
-        stack.splice(stack.indexOf(id), 1);
-      };
-    }
-
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
+    /*
+     * Le défilement de la page n'est pas gelé : la modale vit dans le panneau,
+     * dont le contenu doit rester manipulable derrière elle.
+     */
     return () => {
       document.removeEventListener("keydown", onKeyDown);
       stack.splice(stack.indexOf(id), 1);
-      document.body.style.overflow = previous;
     };
-  }, [open, onClose, contained, id]);
+  }, [open, onClose, id]);
 
   if (!mounted) return null;
 
   return (
     <div
-      className={`${contained ? "absolute" : "fixed"} inset-0 z-[100] flex items-center justify-center p-4
+      className={`absolute inset-0 z-[100] flex justify-center p-4
+        ${anchor === "stable" ? "items-start pt-[22%]" : "items-center"}
         transition-opacity duration-200 ease-out
         ${visible ? "opacity-100" : "opacity-0"}`}
       onClick={(e) => {
@@ -134,17 +148,9 @@ export function Modal({
         aria-label={label}
         tabIndex={-1}
         className={`relative w-full ${className}
-          ${
-            height === "auto"
-              ? contained
-                ? "max-h-[78%]"
-                : "max-h-[90vh]"
-              : contained
-                ? "h-[78%]"
-                : "h-[90vh]"
-          }
-          flex flex-col overflow-hidden rounded-[32px]
-          border border-white/10 bg-black/80 shadow-screen outline-none backdrop-blur-md
+          ${height === "auto" ? "max-h-[78%]" : "h-[78%]"}
+          flex flex-col overflow-hidden rounded-[20px]
+        bg-[#111113] shadow-screen outline-none backdrop-blur-sm
           transition-all duration-200 ease-out motion-reduce:transition-none
           ${visible ? "scale-100 opacity-100 blur-0" : "scale-95 opacity-0 blur-sm"}`}
       >

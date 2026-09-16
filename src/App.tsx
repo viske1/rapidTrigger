@@ -3,6 +3,7 @@ import { ShortcutList } from "./components/ShortcutList";
 import { ShortcutModal } from "./components/ShortcutModal";
 import { MacDemo } from "./components/MacDemo";
 import { Modal } from "./components/Modal";
+import { SetNameModal } from "./components/SetNameModal";
 import { Header } from "./components/Header";
 import { SearchPanel } from "./components/SearchPanel";
 import { ChangeLog } from "./components/ChangeLog";
@@ -43,6 +44,11 @@ export default function App() {
   const [editing, setEditing] = useState<Editing>(null);
   const [panelOpen, setPanelOpen] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
+
+  /** Jeu en cours de nommage : création, ou renommage d'un jeu existant. */
+  const [setNaming, setSetNaming] = useState<
+    { mode: "create" } | { mode: "rename"; id: string; name: string } | null
+  >(null);
 
   const visible = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -93,17 +99,13 @@ export default function App() {
     importState(parsed, file.name);
   }
 
-  function handleCreateSet() {
-    const name = prompt("Nom du nouveau jeu ?", "Nouveau jeu");
-    if (name?.trim()) createSet(name.trim());
-  }
+  function handleSetNameSubmit(name: string) {
+    if (!setNaming) return;
 
-  function handleRenameSet(id: string) {
-    const set = sets.find(s => s.id === id);
-    if (!set) return;
+    if (setNaming.mode === "create") createSet(name);
+    else renameSet(setNaming.id, name);
 
-    const name = prompt("Renommer le jeu", set.name);
-    if (name?.trim()) renameSet(id, name.trim());
+    setSetNaming(null);
   }
 
   function handleDeleteSet(id: string) {
@@ -151,9 +153,12 @@ export default function App() {
             sets={sets}
             activeSetId={activeSetId}
             onSelectSet={selectSet}
-            onCreateSet={handleCreateSet}
+            onCreateSet={() => setSetNaming({ mode: "create" })}
             onDuplicateSet={duplicateSet}
-            onRenameSet={handleRenameSet}
+            onRenameSet={id => {
+              const set = sets.find(s => s.id === id);
+              if (set) setSetNaming({ mode: "rename", id, name: set.name });
+            }}
             onDeleteSet={handleDeleteSet}
             search={search}
             onSearchChange={setSearch}
@@ -198,22 +203,30 @@ export default function App() {
               <ChangeLog history={state.history} onClear={clearHistory} />
             )}
           </main>
+
+          <ShortcutModal
+            open={editing !== null}
+            editing={
+              editing
+                ? (state.shortcuts.find((s) => s.id === editing) ?? null)
+                : null
+            }
+            shortcuts={state.shortcuts}
+            currentScope={scope}
+            onSubmit={handleSubmit}
+            onClose={() => setEditing(null)}
+          />
+
+          <SetNameModal
+            open={setNaming !== null}
+            mode={setNaming?.mode ?? "create"}
+            initialName={setNaming?.mode === "rename" ? setNaming.name : ""}
+            onSubmit={handleSetNameSubmit}
+            onClose={() => setSetNaming(null)}
+          />
         </Modal>
       </MacDemo>
 
-      {editing !== null && (
-        <ShortcutModal
-          editing={
-            editing
-              ? (state.shortcuts.find((s) => s.id === editing) ?? null)
-              : null
-          }
-          shortcuts={state.shortcuts}
-          currentScope={scope}
-          onSubmit={handleSubmit}
-          onClose={() => setEditing(null)}
-        />
-      )}
     </>
   );
 }

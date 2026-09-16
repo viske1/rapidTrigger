@@ -52,7 +52,7 @@ export function SetNameModal({
       open={open}
       onClose={onClose}
       label={mode === "create" ? "Nouveau jeu" : "Renommer le jeu"}
-      className="max-w-[380px]"
+      className="max-w-[412px]"
       height="auto"
       anchor="stable"
     >

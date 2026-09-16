@@ -51,7 +51,13 @@ export function SearchPanel({
   ];
 
   return (
-    <aside className="flex flex-col gap-4 self-start rounded-[20px] border border-white/10 bg-[#0844486a] p-2 h-full">
+    <aside
+      style={{
+        boxShadow:
+          "inset 0 0 4px 0 rgba(255,255,255,0.1), inset 0 1.4px 0 0 rgba(255,255,255,.05)",
+      }}
+      className="flex flex-col gap-4 self-start rounded-[20px] border border-[#000000] bg-[#0844486a] p-2 h-full"
+    >
       <div className="flex flex-col rounded-[16px] border border-white/5 bg-white/5 shadow-md">
         <div className="p-2 px-2.5">
           <Switch

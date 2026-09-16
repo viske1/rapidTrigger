@@ -149,7 +149,7 @@ export function ModalInterface({
         tabIndex={-1}
         className={`relative w-full ${className}
           ${height === "auto" ? "max-h-[78%]" : "h-[78%]"}
-          flex flex-col overflow-hidden rounded-[20px]
+          flex flex-col overflow-hidden rounded-[20px] 
         bg-[#111113] shadow-screen outline-none backdrop-blur-sm
           transition-all duration-200 ease-out motion-reduce:transition-none
           ${visible ? "scale-100 opacity-100 blur-0" : "scale-95 opacity-0 blur-sm"}`}

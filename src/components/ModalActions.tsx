@@ -1,3 +1,4 @@
+import { Button } from "./Button";
 import { InfoIcon } from "./icons/InfoIcon";
 
 interface ModalActionsProps {
@@ -59,22 +60,23 @@ export function ModalActions({
           {message}
         </span>
 
-        <span className="flex items-center gap-2">
-          <button
-            type="button"
+        <span className="flex items-center gap-1">
+          <Button
+            variant="ghost"
             onClick={onCancel}
             style={{ transitionDelay: stagger(0) }}
-            className={`btn btn-tiny ${button}`}
+            className={button}
           >
             {cancelLabel}
-          </button>
-          <button
+          </Button>
+          <Button
             type="submit"
+            variant="solid"
             style={{ transitionDelay: stagger(1) }}
-            className={`btn btn-tiny btn-primary ${button}`}
+            className={button}
           >
             {submitLabel}
-          </button>
+          </Button>
         </span>
       </div>
     </div>

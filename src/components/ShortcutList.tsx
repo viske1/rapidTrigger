@@ -1,65 +1,70 @@
-import { ShortcutRow } from './ShortcutRow';
-import { SCOPES } from '../lib/data';
-import type { Shortcut } from '../lib/types';
-import type { ScopeFilter } from './types';
+import { ShortcutRow } from "./ShortcutRow";
+import { useScrollFade } from "../lib/useScrollFade";
+import { SCOPES } from "../lib/data";
+import type { Shortcut } from "../lib/types";
+import type { ScopeFilter } from "./types";
 
 interface ShortcutListProps {
   shortcuts: Shortcut[];
   scope: ScopeFilter;
   conflicts: Set<string>;
-  onlyModified: boolean;
-  onlyConflicts: boolean;
-  onOnlyModifiedChange: (value: boolean) => void;
-  onOnlyConflictsChange: (value: boolean) => void;
   onEdit: (id: string) => void;
   onRestore: (id: string) => void;
   onDelete: (id: string) => void;
+  onToggleSuspended: (id: string) => void;
 }
 
-const ALL_SCOPE = { label: 'Tous les raccourcis', sub: 'Vue complète' };
-
-const CHECKBOX = 'flex cursor-pointer items-center gap-1.5 text-xs text-muted dark:text-muted-dark';
+const ALL_SCOPE = { label: "Tous les raccourcis", sub: "Vue complète" };
 
 export function ShortcutList({
-  shortcuts, scope, conflicts, onlyModified, onlyConflicts,
-  onOnlyModifiedChange, onOnlyConflictsChange, onEdit, onRestore, onDelete,
+  shortcuts,
+  scope,
+  conflicts,
+  onEdit,
+  onRestore,
+  onDelete,
+  onToggleSuspended,
 }: ShortcutListProps) {
-  const current = scope === 'all' ? ALL_SCOPE : SCOPES.find(s => s.id === scope) ?? ALL_SCOPE;
+  const fade = useScrollFade();
+
+  const current =
+    scope === "all"
+      ? ALL_SCOPE
+      : (SCOPES.find((s) => s.id === scope) ?? ALL_SCOPE);
 
   return (
-    <section className="panel">
-      <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h2 className="m-0 text-[15px]">{current.label}</h2>
-          <p className="mb-0 mt-[3px] text-xs text-muted dark:text-muted-dark">{current.sub}</p>
-        </div>
-
-        <div className="flex gap-3.5">
-          <label className={CHECKBOX}>
-            <input
-              type="checkbox"
-              checked={onlyModified}
-              onChange={e => onOnlyModifiedChange(e.target.checked)}
-            /> Modifiés seulement
-          </label>
-          <label className={CHECKBOX}>
-            <input
-              type="checkbox"
-              checked={onlyConflicts}
-              onChange={e => onOnlyConflictsChange(e.target.checked)}
-            /> Conflits seulement
-          </label>
-        </div>
+    <section className="flex min-h-0 flex-col">
+      <div className="mb-4 flex shrink-0 flex-wrap items-start justify-between gap-3">
+        <h2 className="m-0 font-medium tracking-[-0.2px] text-[16px] pl-3">
+          {current.label}
+        </h2>
       </div>
 
       {conflicts.size > 0 && (
-        <div className="mb-3 rounded-lg border border-danger bg-danger/[.12] px-3 py-2 text-xs text-danger">
-          ⚠︎ {conflicts.size} raccourcis partagent une même combinaison. Modifiez-en un pour lever le conflit.
+        <div className="mb-3 shrink-0 rounded-lg border border-danger bg-danger/[.12] px-3 py-2 text-xs text-danger">
+          ⚠︎ {conflicts.size} raccourcis partagent une même combinaison.
+          Modifiez-en un pour lever le conflit.
         </div>
       )}
 
-      <div className="flex flex-col gap-2">
-        {shortcuts.map(s => (
+      {/*
+        Le masque estompe le contenu à chaque extrémité, en proportion de ce
+        qui reste à faire défiler de ce côté : aucun fondu une fois la butée
+        atteinte, et une montée progressive sur les premiers pixels.
+      */}
+      <div
+        ref={fade.ref}
+        style={{
+          maskImage: `linear-gradient(to bottom,
+            transparent 0, #000 ${fade.top}px,
+            #000 calc(100% - ${fade.bottom}px), transparent 100%)`,
+          WebkitMaskImage: `linear-gradient(to bottom,
+            transparent 0, #000 ${fade.top}px,
+            #000 calc(100% - ${fade.bottom}px), transparent 100%)`,
+        }}
+        className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto"
+      >
+        {shortcuts.map((s) => (
           <ShortcutRow
             key={s.id}
             shortcut={s}
@@ -67,8 +72,18 @@ export function ShortcutList({
             onEdit={onEdit}
             onRestore={onRestore}
             onDelete={onDelete}
+            onToggleSuspended={onToggleSuspended}
           />
         ))}
+
+        {/*
+          Cale de fin de liste : la modale occupe 78 % de la maquette, donc
+          deux tiers de sa hauteur valent environ 40vh. En fin de défilement,
+          la dernière ligne remonte ainsi au premier tiers.
+        */}
+        {shortcuts.length > 0 && (
+          <div aria-hidden="true" className="h-[128px] shrink-0" />
+        )}
       </div>
 
       {shortcuts.length === 0 && (

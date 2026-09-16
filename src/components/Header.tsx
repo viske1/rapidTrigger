@@ -1,16 +1,26 @@
 import { useRef, useState } from "react";
 import { IconButton } from "./IconButton";
 import { CustomTooltip } from "./CustomTooltip";
+import { SetPicker } from "./SetPicker";
 import { DropdownInterface } from "./DropdownInterface";
 import { ButtonOptionInterface } from "./ButtonOptionInterface";
+import { LogoIcon } from "./icons/LogoIcon";
 import { PlusIcon } from "./icons/PlusIcon";
 import { HistoryIcon } from "./icons/HistoryIcon";
 import { MoreVertIcon } from "./icons/MoreVertIcon";
+import type { ShortcutSet } from "../lib/types";
 import { AutorenewIcon } from "./icons/AutorenewIcon";
 import { DownloadIcon } from "./icons/DownloadIcon";
 import { UploadIcon } from "./icons/UploadIcon";
 
 interface HeaderProps {
+  sets: ShortcutSet[];
+  activeSetId: string;
+  onSelectSet: (id: string) => void;
+  onCreateSet: () => void;
+  onDuplicateSet: (id: string) => void;
+  onRenameSet: (id: string) => void;
+  onDeleteSet: (id: string) => void;
   search: string;
   onSearchChange: (search: string) => void;
   onNew: () => void;
@@ -23,6 +33,13 @@ interface HeaderProps {
 
 /** Barre de recherche et actions de l'interface. */
 export function Header({
+  sets,
+  activeSetId,
+  onSelectSet,
+  onCreateSet,
+  onDuplicateSet,
+  onRenameSet,
+  onDeleteSet,
   search,
   onSearchChange,
   onNew,
@@ -36,14 +53,26 @@ export function Header({
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <header className="flex items-center gap-1 p-4">
+    <header className="flex shrink-0 items-center gap-1 p-5">
+      <LogoIcon className="mr-2 h-[24px] w-auto shrink-0 text-content dark:text-content-dark" />
+
+      <SetPicker
+        sets={sets}
+        activeId={activeSetId}
+        onSelect={onSelectSet}
+        onCreate={onCreateSet}
+        onDuplicate={onDuplicateSet}
+        onRename={onRenameSet}
+        onDelete={onDeleteSet}
+      />
+
       <input
         type="text"
         value={search}
         onChange={(e) => onSearchChange(e.target.value)}
         placeholder="Rechercher un raccourci…"
         aria-label="Rechercher un raccourci"
-        className="w-full min-w-0 flex-1 rounded-[10px] border-0 bg-black/[.04] py-[5px] pl-3 pr-3
+        className="h-[30px] w-full min-w-0 flex-1 rounded-[10px] border-0 bg-black/[.04] pl-3 pr-3
           text-[13px] font-medium tracking-[-0.1px] text-content outline-none
           transition-all duration-200 placeholder:text-content/40
           focus:ring-2 focus:ring-black/10 focus:ring-offset-0
@@ -58,7 +87,9 @@ export function Header({
       </CustomTooltip>
 
       <CustomTooltip
-        text={historyOpen ? "Masquer l'historique" : "Historique des modifications"}
+        text={
+          historyOpen ? "Masquer l'historique" : "Historique des modifications"
+        }
         position="bottom"
       >
         <IconButton
@@ -79,6 +110,7 @@ export function Header({
       <div className="relative">
         <IconButton
           label="Plus d'options"
+          active={menuOpen}
           data-dropdown-trigger
           onClick={() => setMenuOpen((o) => !o)}
           aria-haspopup="menu"
@@ -95,7 +127,7 @@ export function Header({
         >
           <ButtonOptionInterface
             label="Exporter"
-              icon={<DownloadIcon className="h-4 w-4" />}
+            icon={<DownloadIcon className="h-4 w-4" />}
             onClick={() => {
               setMenuOpen(false);
               onExport();
@@ -103,7 +135,7 @@ export function Header({
           />
           <ButtonOptionInterface
             label="Importer"
-              icon={<UploadIcon className="h-4 w-4" />}
+            icon={<UploadIcon className="h-4 w-4" />}
             onClick={() => {
               setMenuOpen(false);
               fileInput.current?.click();
@@ -111,7 +143,7 @@ export function Header({
           />
           <ButtonOptionInterface
             label="Réinitialiser"
-              icon={<AutorenewIcon className="h-4 w-4" />}
+            icon={<AutorenewIcon className="h-4 w-4" />}
             onClick={() => {
               setMenuOpen(false);
               onReset();

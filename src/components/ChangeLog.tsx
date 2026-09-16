@@ -13,7 +13,7 @@ const dateFormat = new Intl.DateTimeFormat('fr-FR', {
 /** Journal des modifications : historique horodaté des actions sur les raccourcis. */
 export function ChangeLog({ history, onClear }: ChangeLogProps) {
   return (
-    <aside className="panel">
+    <aside className="panel flex min-h-0 flex-col">
       <div className="flex items-center justify-between gap-2">
         <h3 className="m-0 text-[13px]">Journal des modifications</h3>
         <button
@@ -31,7 +31,7 @@ export function ChangeLog({ history, onClear }: ChangeLogProps) {
           Aucune modification pour l’instant.
         </p>
       ) : (
-        <ul className="m-0 mt-3 flex max-h-[60vh] list-none flex-col gap-2 overflow-auto p-0">
+        <ul className="m-0 mt-3 flex min-h-0 flex-1 list-none flex-col gap-2 overflow-y-auto p-0">
           {history.map((entry, i) => (
             <li key={`${entry.at}-${i}`} className="border-l-2 border-accent pl-2 text-xs">
               <strong>{entry.action}</strong> — {entry.detail}

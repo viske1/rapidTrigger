@@ -23,6 +23,14 @@ export default function App() {
     updateShortcut,
     restoreShortcut,
     deleteShortcut,
+    toggleSuspended,
+    sets,
+    activeSetId,
+    selectSet,
+    createSet,
+    duplicateSet,
+    renameSet,
+    deleteSet,
     importState,
     resetAll,
     clearHistory,
@@ -60,12 +68,48 @@ export default function App() {
   }
 
   async function handleImport(file: File) {
+    let parsed: State;
     try {
-      const parsed = JSON.parse(await file.text()) as State;
+      parsed = JSON.parse(await file.text()) as State;
       if (!Array.isArray(parsed.shortcuts)) throw new Error("format");
-      importState(parsed, file.name);
     } catch {
       alert("Fichier invalide : un export Shortcut Center est attendu.");
+      return;
+    }
+
+    // Deux usages légitimes : recevoir un jeu de plus, ou remplacer le sien.
+    const asNewSet = confirm(
+      `Importer « ${file.name} » comme nouveau jeu ?\n\n` +
+        "OK : créer un jeu à partir de ce fichier.\n" +
+        "Annuler : remplacer le contenu du jeu actif.",
+    );
+
+    if (asNewSet) {
+      const name = file.name.replace(/\.json$/i, "");
+      createSet(name, { shortcuts: parsed.shortcuts, history: parsed.history ?? [] });
+      return;
+    }
+
+    importState(parsed, file.name);
+  }
+
+  function handleCreateSet() {
+    const name = prompt("Nom du nouveau jeu ?", "Nouveau jeu");
+    if (name?.trim()) createSet(name.trim());
+  }
+
+  function handleRenameSet(id: string) {
+    const set = sets.find(s => s.id === id);
+    if (!set) return;
+
+    const name = prompt("Renommer le jeu", set.name);
+    if (name?.trim()) renameSet(id, name.trim());
+  }
+
+  function handleDeleteSet(id: string) {
+    const set = sets.find(s => s.id === id);
+    if (set && confirm(`Supprimer le jeu « ${set.name} » et tous ses raccourcis ?`)) {
+      deleteSet(id);
     }
   }
 
@@ -104,6 +148,13 @@ export default function App() {
           contained
         >
           <Header
+            sets={sets}
+            activeSetId={activeSetId}
+            onSelectSet={selectSet}
+            onCreateSet={handleCreateSet}
+            onDuplicateSet={duplicateSet}
+            onRenameSet={handleRenameSet}
+            onDeleteSet={handleDeleteSet}
             search={search}
             onSearchChange={setSearch}
             onNew={() => setEditing("")}
@@ -114,8 +165,11 @@ export default function App() {
             onReset={handleReset}
           />
 
+          {/* La modale est en flex-col : le header garde sa taille, ce bloc
+              prend la hauteur restante. Les colonnes s'y tiennent en pleine
+              hauteur (items-stretch), et seule la liste défile. */}
           <main
-            className={`grid grid-cols-1 items-start gap-4 px-4 pb-4
+            className={`grid min-h-0 flex-1 grid-cols-1 gap-8 overflow-hidden px-4 pb-4
               ${historyOpen ? "xl:grid-cols-[230px_1fr_280px]" : "xl:grid-cols-[230px_1fr]"}`}
           >
             <SearchPanel
@@ -124,19 +178,20 @@ export default function App() {
               modifiedCount={modifiedCount}
               conflictCount={conflicts.size}
               onScopeChange={setScope}
+              onlyModified={onlyModified}
+              onlyConflicts={onlyConflicts}
+              onOnlyModifiedChange={setOnlyModified}
+              onOnlyConflictsChange={setOnlyConflicts}
             />
 
             <ShortcutList
               shortcuts={visible}
               scope={scope}
               conflicts={conflicts}
-              onlyModified={onlyModified}
-              onlyConflicts={onlyConflicts}
-              onOnlyModifiedChange={setOnlyModified}
-              onOnlyConflictsChange={setOnlyConflicts}
               onEdit={setEditing}
               onRestore={restoreShortcut}
               onDelete={handleDelete}
+              onToggleSuspended={toggleSuspended}
             />
 
             {historyOpen && (

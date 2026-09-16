@@ -9,6 +9,8 @@ interface IconButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   size?: number;
   /** Rayon de la pastille de survol, en pixels. */
   radius?: number;
+  /** Maintient l'état de survol, par exemple tant qu'un menu est ouvert. */
+  active?: boolean;
 }
 
 /**
@@ -18,7 +20,15 @@ interface IconButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
  */
 export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
   function IconButton(
-    { label, children, size = 30, radius = 10, className = "", ...props },
+    {
+      label,
+      children,
+      size = 30,
+      radius = 10,
+      active = false,
+      className = "",
+      ...props
+    },
     ref,
   ) {
     return (
@@ -26,6 +36,7 @@ export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
         ref={ref}
         type="button"
         aria-label={label}
+        data-active={active || undefined}
         style={{ width: size, height: size, borderRadius: radius }}
         className={`hover-pop hover-pop-surface grid shrink-0 place-items-center
           text-content/70 transition-colors duration-150

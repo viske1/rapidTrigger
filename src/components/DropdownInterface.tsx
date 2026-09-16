@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import type { ReactNode } from "react";
 
 interface DropdownInterfaceProps {
@@ -7,12 +7,24 @@ interface DropdownInterfaceProps {
   children: ReactNode;
   /** Côté d'alignement par rapport au déclencheur. */
   align?: "left" | "right";
+  /**
+   * Menu ouvert à l'intérieur d'un autre : il reste hors du registre, sans
+   * quoi son ouverture fermerait le menu parent qui le contient.
+   */
+  nested?: boolean;
   /** Largeur et autres utilitaires du panneau. */
   className?: string;
 }
 
 /** Durée des transitions, à garder en phase avec duration-150 ci-dessous. */
 const DURATION = 150;
+
+/*
+ * Un seul menu ouvert à la fois : celui qui s'ouvre demande aux autres de se
+ * fermer. Le registre est partagé par toutes les instances du composant.
+ */
+let openMenu: string | null = null;
+const closers = new Map<string, () => void>();
 
 /**
  * Menu déroulant de l'interface : positionné sous son déclencheur, animé en
@@ -27,8 +39,10 @@ export function DropdownInterface({
   onClose,
   children,
   align = "left",
+  nested = false,
   className = "w-64",
 }: DropdownInterfaceProps) {
+  const id = useId();
   const [mounted, setMounted] = useState(open);
   const [visible, setVisible] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -53,6 +67,28 @@ export function DropdownInterface({
       cancelAnimationFrame(inner);
     };
   }, [open]);
+
+  useEffect(() => {
+    if (nested) return;
+
+    closers.set(id, onClose);
+    return () => {
+      closers.delete(id);
+      if (openMenu === id) openMenu = null;
+    };
+  }, [id, onClose, nested]);
+
+  useEffect(() => {
+    if (nested) return;
+
+    if (!open) {
+      if (openMenu === id) openMenu = null;
+      return;
+    }
+
+    if (openMenu !== null && openMenu !== id) closers.get(openMenu)?.();
+    openMenu = id;
+  }, [open, id, nested]);
 
   // Échap ferme, ainsi qu'un clic en dehors du panneau et de son déclencheur.
   useEffect(() => {
@@ -92,7 +128,7 @@ export function DropdownInterface({
       className={`absolute top-full z-50 mt-1.5 ${align === "right" ? "right-0" : "left-0"}
         ${className} origin-top rounded-[16px] p-1.5 shadow-menu
         backdrop-blur-[10px] backdrop-saturate-150
-        border-gradient bg-panel/90 dark:bg-black/50
+        border-gradient bg-panel/90 dark:bg-black/100
         transition-[opacity,transform] duration-150 ease-out motion-reduce:transition-none
         ${visible ? "scale-100 opacity-100" : "scale-95 opacity-0"}`}
     >

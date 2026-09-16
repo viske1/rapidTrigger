@@ -125,6 +125,7 @@ export function MacDemo({ slots = 4, onOpen, children }: MacDemoProps) {
               <button
                 type="button"
                 data-dropdown-trigger
+                data-active={menuOpen || undefined}
                 onClick={() => setMenuOpen((o) => !o)}
                 aria-haspopup="menu"
                 aria-expanded={menuOpen}

@@ -111,9 +111,9 @@ export function Modal({
         onClick={(e) => e.stopPropagation()}
         aria-label={label}
         tabIndex={-1}
-        className={`relative ${contained ? "max-h-[78%]" : "max-h-[90vh]"} w-full ${className}
-          overflow-auto rounded-[24px]
-          border border-white/10 bg-black/60 shadow-screen outline-none backdrop-blur-md
+        className={`relative ${contained ? "h-[78%]" : "h-[90vh]"} w-full ${className}
+          flex flex-col overflow-hidden rounded-[32px]
+          border border-white/10 bg-black/80 shadow-screen outline-none backdrop-blur-md
           transition-all duration-200 ease-out motion-reduce:transition-none
           ${visible ? "scale-100 opacity-100 blur-0" : "scale-95 opacity-0 blur-sm"}`}
       >

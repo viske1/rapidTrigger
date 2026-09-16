@@ -61,13 +61,16 @@
    * Ces boutons vivent sur un conteneur déjà en bg-white/[.16] : l'opacité
    * doit être franche pour que la pastille se détache du fond.
    */
+  /* [data-active] force l'état : un menu ouvert garde son bouton marqué,
+     même quand la souris l'a quitté pour aller sur le panneau. */
   .hover-pop:hover::before,
-  .hover-pop:focus-visible::before {
-    @apply opacity-20;
+  .hover-pop:focus-visible::before,
+  .hover-pop[data-active]::before {
+    @apply opacity-10;
     transform: scale(1);
   }
   .hover-pop:active::before {
-    @apply opacity-50;
+    @apply opacity-30;
     transform: scale(0.95);
   }
 
@@ -122,6 +125,18 @@
     -webkit-mask-composite: xor;
     mask-composite: exclude;
     pointer-events: none;
+  }
+
+  /*
+   * Le bouton d'actions apparaît en même temps que la coche s'écarte, mais
+   * disparaît bien plus vite : sinon il reste visible sous la coche qui
+   * revient se poser dessus, d'où un chevauchement en sortie de survol.
+   */
+  .icon-button-fade {
+    transition: opacity 0.08s ease-in;
+  }
+  .group:hover .icon-button-fade {
+    transition: opacity 0.2s ease-out 0.06s;
   }
 
   /* Champs de formulaire */

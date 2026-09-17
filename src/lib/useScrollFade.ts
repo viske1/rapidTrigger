@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
-/** Distance, en pixels, sur laquelle le dégradé atteint sa pleine intensité. */
-const RAMP = 48;
+/** Distance par défaut, en pixels, sur laquelle le dégradé atteint sa pleine intensité. */
+const DEFAULT_RAMP = 48;
 
 interface ScrollFade {
   /** À poser sur le conteneur défilant. */
@@ -16,7 +16,7 @@ interface ScrollFade {
  * extrémité. Les valeurs montent progressivement sur les premiers pixels, si
  * bien que le dégradé apparaît et disparaît sans à-coup aux butées.
  */
-export function useScrollFade(): ScrollFade {
+export function useScrollFade(ramp = DEFAULT_RAMP): ScrollFade {
   const [fade, setFade] = useState({ top: 0, bottom: 0 });
   const node = useRef<HTMLElement | null>(null);
 
@@ -28,11 +28,11 @@ export function useScrollFade(): ScrollFade {
     const below = el.scrollHeight - el.clientHeight - el.scrollTop;
 
     setFade(prev => {
-      const top = Math.min(above, RAMP);
-      const bottom = Math.min(Math.max(below, 0), RAMP);
+      const top = Math.min(above, ramp);
+      const bottom = Math.min(Math.max(below, 0), ramp);
       return prev.top === top && prev.bottom === bottom ? prev : { top, bottom };
     });
-  }, []);
+  }, [ramp]);
 
   // La liste change de longueur au fil des filtres : on remesure aussi sur
   // redimensionnement du contenu, pas seulement au défilement.

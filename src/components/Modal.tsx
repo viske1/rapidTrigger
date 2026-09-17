@@ -137,10 +137,10 @@ export function Modal({
           ${
             height === "auto"
               ? contained
-                ? "max-h-[78%]"
+                ? "max-h-[86%]"
                 : "max-h-[90vh]"
               : contained
-                ? "h-[78%]"
+                ? "h-[86%]"
                 : "h-[90vh]"
           }
           flex flex-col overflow-hidden rounded-[32px]

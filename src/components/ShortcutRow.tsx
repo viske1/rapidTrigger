@@ -21,6 +21,8 @@ interface ShortcutRowProps {
   onRestore: (id: string) => void;
   onDelete: (id: string) => void;
   onToggleSuspended: (id: string) => void;
+  /** Signale la combinaison survolée, pour l'illustrer sur le clavier. */
+  onHover?: (combo: string | null) => void;
 }
 
 export function ShortcutRow({
@@ -30,12 +32,15 @@ export function ShortcutRow({
   onRestore,
   onDelete,
   onToggleSuspended,
+  onHover,
 }: ShortcutRowProps) {
   const modified = isModified(shortcut);
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
     <div
+      onMouseEnter={() => onHover?.(shortcut.combo)}
+      onMouseLeave={() => onHover?.(null)}
       className={`flex justify-between items-center gap-3 rounded-[16px]
          px-3 py-2.5 transition-colors duration-150 hover:dark:bg-white/5
         ${menuOpen ? "dark:bg-white/5" : ""}

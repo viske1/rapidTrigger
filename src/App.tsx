@@ -3,6 +3,7 @@ import { ShortcutList } from "./components/ShortcutList";
 import { ShortcutModal } from "./components/ShortcutModal";
 import { MacDemo } from "./components/MacDemo";
 import { Modal } from "./components/Modal";
+import { MacKeyboard } from "./components/MacKeyboard";
 import { SetNameModal } from "./components/SetNameModal";
 import { Header } from "./components/Header";
 import { SearchPanel } from "./components/SearchPanel";
@@ -44,6 +45,8 @@ export default function App() {
   const [editing, setEditing] = useState<Editing>(null);
   const [panelOpen, setPanelOpen] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
+  /** Combinaison de la ligne survolée, mise en avant sur le clavier. */
+  const [hoveredCombo, setHoveredCombo] = useState<string | null>(null);
 
   /** Jeu en cours de nommage : création, ou renommage d'un jeu existant. */
   const [setNaming, setSetNaming] = useState<
@@ -146,7 +149,7 @@ export default function App() {
           open={panelOpen}
           onClose={() => setPanelOpen(false)}
           label="Centre de contrôle des raccourcis"
-          className="max-w-[70%]"
+          className="max-w-[82%]"
           contained
         >
           <Header
@@ -197,12 +200,27 @@ export default function App() {
               onRestore={restoreShortcut}
               onDelete={handleDelete}
               onToggleSuspended={toggleSuspended}
+              onHover={setHoveredCombo}
             />
 
             {historyOpen && (
               <ChangeLog history={state.history} onClear={clearHistory} />
             )}
           </main>
+
+          {/*
+            Clavier de synthèse : chaque touche s'éclaire à proportion de son
+            emploi dans le jeu, et passe en pleine lumière quand on survole
+            une ligne de la liste.
+          */}
+          <div className="shrink-0 px-4 pb-4">
+            <MacKeyboard
+              shortcuts={state.shortcuts}
+              highlight={hoveredCombo ?? ""}
+              interactive
+              onSelect={setEditing}
+            />
+          </div>
 
           <ShortcutModal
             open={editing !== null}

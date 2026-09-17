@@ -99,7 +99,7 @@ export function MacDemo({ slots = 4, onOpen, children }: MacDemoProps) {
         (max-aspect-ratio) pour éviter tout débordement horizontal.
       */}
       <div
-        className="relative aspect-video h-[80vh] w-auto max-w-full shrink-0
+        className="relative aspect-video h-[92vh] w-auto max-w-full shrink-0
           overflow-hidden rounded-[32px] shadow-screen
           [@media(max-aspect-ratio:16/9)]:h-auto [@media(max-aspect-ratio:16/9)]:w-full"
       >

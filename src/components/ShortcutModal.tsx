@@ -192,7 +192,7 @@ export function ShortcutModal({
             </p>
 
             <div className="mt-2.5 w-full">
-              <MacKeyboard combo={draft.combo} />
+              <MacKeyboard highlight={draft.combo} unit={22} />
             </div>
           </Field>
         </div>

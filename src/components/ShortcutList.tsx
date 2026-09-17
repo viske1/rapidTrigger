@@ -12,6 +12,7 @@ interface ShortcutListProps {
   onRestore: (id: string) => void;
   onDelete: (id: string) => void;
   onToggleSuspended: (id: string) => void;
+  onHover?: (combo: string | null) => void;
 }
 
 const ALL_SCOPE = { label: "Tous les raccourcis", sub: "Vue complète" };
@@ -24,6 +25,7 @@ export function ShortcutList({
   onRestore,
   onDelete,
   onToggleSuspended,
+  onHover,
 }: ShortcutListProps) {
   const fade = useScrollFade();
 
@@ -73,6 +75,7 @@ export function ShortcutList({
             onRestore={onRestore}
             onDelete={onDelete}
             onToggleSuspended={onToggleSuspended}
+            onHover={onHover}
           />
         ))}
 

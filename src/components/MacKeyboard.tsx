@@ -3,6 +3,7 @@ import { KEYBOARD } from "../lib/keyboard";
 import { keyUsageMap } from "../lib/keyUsage";
 import { HoverCard } from "./HoverCard";
 import { KeyShortcutList } from "./KeyShortcutList";
+import { KEY_CAP } from "../lib/keyStyle";
 import type { Shortcut } from "../lib/types";
 
 interface MacKeyboardProps {
@@ -28,7 +29,11 @@ const GAP = 3;
  * net et évite les problèmes d'empilement.
  */
 export function MacKeyboard({
-  shortcuts = [], highlight = "", unit = 26, interactive = false, onSelect,
+  shortcuts = [],
+  highlight = "",
+  unit = 26,
+  interactive = false,
+  onSelect,
 }: MacKeyboardProps) {
   const usage = useMemo(() => keyUsageMap(shortcuts), [shortcuts]);
   const lit = useMemo(
@@ -39,7 +44,7 @@ export function MacKeyboard({
   return (
     <div
       className="flex w-full flex-col items-center gap-[3px] rounded-[14px]
-        border border-black bg-black/25 p-2"
+        p-2"
     >
       {KEYBOARD.map((row, y) => (
         <div key={y} className="flex gap-[3px]" style={{ height: unit }}>
@@ -67,13 +72,14 @@ export function MacKeyboard({
                 className={`grid shrink-0 place-items-center rounded-[5px] text-[10px]
                   font-medium leading-none transition-all duration-200 ease-out
                   motion-reduce:transition-none
-                  ${active
-                    ? "bg-gradient-to-b from-accent to-accent-strong text-white " +
-                      "shadow-[0_0_14px_0_rgba(91,140,255,.7),inset_0_1px_0_0_rgba(255,255,255,.35)]"
-                    : used
-                      ? "text-white/85"
-                      : "bg-gradient-to-b from-white/[.09] to-white/[.04] text-white/40 " +
-                        "shadow-[0_1px_0_0_rgba(0,0,0,.5),inset_0_1px_0_0_rgba(255,255,255,.08)]"}
+                  ${
+                    active
+                      ? "bg-gradient-to-b from-accent to-accent-strong text-white " +
+                        "shadow-[0_0_14px_0_rgba(91,140,255,.7),inset_0_1px_0_0_rgba(255,255,255,.35)]"
+                      : used
+                        ? "text-white/85"
+                        : KEY_CAP
+                  }
                   ${interactive && used ? "cursor-pointer" : ""}`}
               >
                 {key.label}
@@ -81,7 +87,11 @@ export function MacKeyboard({
             );
 
             if (!interactive || !used) {
-              return <span key={x} aria-hidden="true">{cap}</span>;
+              return (
+                <span key={x} aria-hidden="true">
+                  {cap}
+                </span>
+              );
             }
 
             return (

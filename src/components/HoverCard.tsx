@@ -127,6 +127,13 @@ export function HoverCard({
             setOpen(true);
           }}
           onMouseLeave={handleLeave}
+          onClick={() => {
+            // Agir depuis le panneau le ferme : sans cela il resterait ouvert
+            // sous le curseur, par-dessus ce que le clic vient de déclencher.
+            clearTimeout(showTimer.current);
+            cancelClose();
+            setOpen(false);
+          }}
         >
           <div
             className={`${className} overflow-hidden rounded-[14px] border border-black

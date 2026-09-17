@@ -1,5 +1,11 @@
 import { ShortcutRow } from "./ShortcutRow";
+import { useState } from "react";
 import { useScrollFade } from "../lib/useScrollFade";
+import { useElementWidth } from "../lib/useElementWidth";
+import { IconButton } from "./IconButton";
+import { CustomTooltip } from "./CustomTooltip";
+import { ColumnsOneIcon } from "./icons/ColumnsOneIcon";
+import { ColumnsTwoIcon } from "./icons/ColumnsTwoIcon";
 import { SCOPES } from "../lib/data";
 import type { Shortcut } from "../lib/types";
 import type { ScopeFilter } from "./types";
@@ -15,6 +21,10 @@ interface ShortcutListProps {
   onHover?: (combo: string | null) => void;
 }
 
+/** En deçà, une colonne écrase trop le nom du raccourci. */
+const MIN_COLUMN_WIDTH = 312;
+const COLUMN_GAP = 8;
+
 const ALL_SCOPE = { label: "Tous les raccourcis", sub: "Vue complète" };
 
 export function ShortcutList({
@@ -28,6 +38,18 @@ export function ShortcutList({
   onHover,
 }: ShortcutListProps) {
   const fade = useScrollFade();
+  const [listRef, listWidth] = useElementWidth();
+
+  /* Disposition choisie ; deux colonnes par défaut. */
+  const [columns, setColumns] = useState<1 | 2>(2);
+
+  /*
+   * En deux colonnes, chaque élément reçoit la moitié de la largeur moins la
+   * gouttière. Sous MIN_COLUMN_WIDTH le nom serait trop écrasé : on replie
+   * alors sur une colonne, sans changer le choix de l'utilisateur.
+   */
+  const fitsTwo = (listWidth - COLUMN_GAP) / 2 >= MIN_COLUMN_WIDTH;
+  const effectiveColumns = columns === 2 && fitsTwo ? 2 : 1;
 
   const current =
     scope === "all"
@@ -40,6 +62,34 @@ export function ShortcutList({
         <h2 className="m-0 font-medium tracking-[-0.2px] text-[16px] pl-3">
           {current.label}
         </h2>
+
+        <div className="flex items-center gap-0.5 pr-1">
+          <CustomTooltip text="Une colonne" position="bottom">
+            <IconButton
+              label="Afficher sur une colonne"
+              active={columns === 1}
+              onClick={() => setColumns(1)}
+            >
+              <ColumnsOneIcon className="h-[14px] w-[14px]" />
+            </IconButton>
+          </CustomTooltip>
+
+          <CustomTooltip
+            text={
+              fitsTwo ? "Deux colonnes" : "Deux colonnes — place insuffisante"
+            }
+            position="bottom"
+          >
+            <IconButton
+              label="Afficher sur deux colonnes"
+              active={columns === 2}
+              disabled={!fitsTwo}
+              onClick={() => setColumns(2)}
+            >
+              <ColumnsTwoIcon className="h-[14px] w-[14px]" />
+            </IconButton>
+          </CustomTooltip>
+        </div>
       </div>
 
       {conflicts.size > 0 && (
@@ -55,7 +105,10 @@ export function ShortcutList({
         atteinte, et une montée progressive sur les premiers pixels.
       */}
       <div
-        ref={fade.ref}
+        ref={(node) => {
+          fade.ref(node);
+          listRef(node);
+        }}
         style={{
           maskImage: `linear-gradient(to bottom,
             transparent 0, #000 ${fade.top}px,
@@ -64,7 +117,8 @@ export function ShortcutList({
             transparent 0, #000 ${fade.top}px,
             #000 calc(100% - ${fade.bottom}px), transparent 100%)`,
         }}
-        className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto"
+        className={`grid min-h-0 flex-1 content-start gap-1 overflow-y-auto
+          ${effectiveColumns === 2 ? "grid-cols-2" : "grid-cols-1"}`}
       >
         {shortcuts.map((s) => (
           <ShortcutRow
@@ -85,7 +139,10 @@ export function ShortcutList({
           la dernière ligne remonte ainsi au premier tiers.
         */}
         {shortcuts.length > 0 && (
-          <div aria-hidden="true" className="h-[128px] shrink-0" />
+          <div
+            aria-hidden="true"
+            className="col-span-full h-[128px] shrink-0"
+          />
         )}
       </div>
 

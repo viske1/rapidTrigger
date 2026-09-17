@@ -95,7 +95,10 @@ export default function App() {
 
     if (asNewSet) {
       const name = file.name.replace(/\.json$/i, "");
-      createSet(name, { shortcuts: parsed.shortcuts, history: parsed.history ?? [] });
+      createSet(name, {
+        shortcuts: parsed.shortcuts,
+        history: parsed.history ?? [],
+      });
       return;
     }
 
@@ -112,8 +115,11 @@ export default function App() {
   }
 
   function handleDeleteSet(id: string) {
-    const set = sets.find(s => s.id === id);
-    if (set && confirm(`Supprimer le jeu « ${set.name} » et tous ses raccourcis ?`)) {
+    const set = sets.find((s) => s.id === id);
+    if (
+      set &&
+      confirm(`Supprimer le jeu « ${set.name} » et tous ses raccourcis ?`)
+    ) {
       deleteSet(id);
     }
   }
@@ -149,7 +155,7 @@ export default function App() {
           open={panelOpen}
           onClose={() => setPanelOpen(false)}
           label="Centre de contrôle des raccourcis"
-          className="max-w-[82%]"
+          className="max-w-[75%]"
           contained
         >
           <Header
@@ -158,8 +164,8 @@ export default function App() {
             onSelectSet={selectSet}
             onCreateSet={() => setSetNaming({ mode: "create" })}
             onDuplicateSet={duplicateSet}
-            onRenameSet={id => {
-              const set = sets.find(s => s.id === id);
+            onRenameSet={(id) => {
+              const set = sets.find((s) => s.id === id);
               if (set) setSetNaming({ mode: "rename", id, name: set.name });
             }}
             onDeleteSet={handleDeleteSet}
@@ -244,7 +250,6 @@ export default function App() {
           />
         </Modal>
       </MacDemo>
-
     </>
   );
 }

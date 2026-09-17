@@ -41,7 +41,7 @@ export function ShortcutRow({
     <div
       onMouseEnter={() => onHover?.(shortcut.combo)}
       onMouseLeave={() => onHover?.(null)}
-      className={`flex justify-between items-center gap-3 rounded-[16px]
+      className={`flex justify-between items-center gap-4 rounded-[16px]
          px-3 py-2.5 transition-colors duration-150 hover:dark:bg-white/5
         ${menuOpen ? "dark:bg-white/5" : ""}
         ${conflict ? "border-danger" : ""}
@@ -69,9 +69,9 @@ export function ShortcutRow({
         </div>
       </div>
 
-      {/* Largeur fixe et alignement à droite : les combinaisons se calent
-          les unes sous les autres quelle que soit la longueur du nom. */}
-      <div className="flex w-[190px] shrink-0 justify-end">
+      {/* Pas de largeur fixe : en colonne étroite, elle écraserait le nom.
+          Le gap du conteneur garantit l'écart minimal avec ce qui précède. */}
+      <div className="flex shrink-0 justify-end">
         <Combo combo={shortcut.combo} />
       </div>
 

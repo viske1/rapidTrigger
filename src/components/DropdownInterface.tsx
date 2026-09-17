@@ -127,7 +127,7 @@ export function DropdownInterface({
       role="menu"
       style={{
         boxShadow:
-          "inset 0 0 8px 0 rgba(255,255,255,0.2), inset 0 1.4px 0 0 rgba(255,255,255,.04)",
+          "inset 0 0 8px 0 rgba(255,255,255,0.15), inset 0 1.4px 0 0 rgba(255,255,255,.04)",
       }}
       className={`absolute top-full z-50 mt-1.5 ${align === "right" ? "right-0" : "left-0"}
         ${className} origin-top rounded-[16px] p-1.5 shadow-menu

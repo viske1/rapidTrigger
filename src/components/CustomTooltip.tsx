@@ -280,6 +280,8 @@ export function CustomTooltip({
           <div
             role="tooltip"
             style={{
+              boxShadow:
+                "inset 0 0 4px 0 rgba(255,255,255,0.03), inset 0 1.2px 0 0 rgba(255,255,255,.03)",
               position: "fixed",
               left: coords.x,
               top: coords.y,
@@ -298,7 +300,7 @@ export function CustomTooltip({
               })`.trim(),
             }}
             className={`pointer-events-none z-[10000] inline-block rounded-[12px]
-            bg-black/55 px-3 py-1.5 text-[12px] font-medium
+            bg-[#111113ae] px-3 py-1.5 text-[12px] font-medium
             tracking-[-0.1px] text-white backdrop-blur-lg
             shadow-[0_5px_8px_-2px_rgba(0,0,0,0.4)]
             ${wrap ? "whitespace-pre-line text-left" : "whitespace-nowrap"}

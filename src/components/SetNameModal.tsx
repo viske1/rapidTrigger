@@ -3,6 +3,7 @@ import type { FormEvent } from "react";
 import { ModalInterface } from "./ModalInterface";
 import { JoystickIcon } from "./icons/JoystickIcon";
 import { ModalActions } from "./ModalActions";
+import { Field, FIELD_INPUT } from "./Field";
 
 interface SetNameModalProps {
   open: boolean;
@@ -68,35 +69,16 @@ export function SetNameModal({
           {mode === "create" ? "Nouveau jeu" : "Renommer le jeu"}
         </h3>
 
-        <div
-          /*
-            Deux ombres internes pour le relief : un liseré clair sur tout le
-            pourtour, puis une seconde sans flou et plus claire, qui n'éclaire
-            que la partie haute comme le ferait une lumière rasante.
-          */
-          style={{
-            boxShadow:
-              "inset 0 0 4px 0 rgba(255,255,255,.1), inset 0 1.2px 0 0 rgba(255,255,255,.10)",
-          }}
-          className="flex flex-col items-start justify-center w-full bg-white/5 border border-black p-3 rounded-[18px]"
-        >
-          <span className="text-[13px] tracking-[-0.1px] font-medium text-white mb-2 pl-1">
-            Nom du nouveau jeu
-          </span>
+        <Field label={mode === "create" ? "Nom du nouveau jeu" : "Nouveau nom"}>
           <input
             ref={input}
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Nom du jeu"
             aria-label="Nom du jeu"
-            className="h-[34px] w-full rounded-[10px] border-0 bg-black/[.04] px-3
-            text-[13px] font-medium tracking-[-0.1px] text-content outline-none
-            transition-all duration-200 placeholder:text-content/40
-            focus:ring-2 focus:ring-black/10
-            dark:bg-white/[.06] dark:text-content-dark
-            dark:placeholder:text-content-dark/40 dark:focus:ring-white/15"
+            className={FIELD_INPUT}
           />
-        </div>
+        </Field>
 
         <ModalActions
           visible={canSubmit}

@@ -41,7 +41,7 @@ export function ShortcutList({
   const [listRef, listWidth] = useElementWidth();
 
   /* Disposition choisie ; deux colonnes par défaut. */
-  const [columns, setColumns] = useState<1 | 2>(2);
+  const [columns, setColumns] = useState<1 | 2>(1);
 
   /*
    * En deux colonnes, chaque élément reçoit la moitié de la largeur moins la

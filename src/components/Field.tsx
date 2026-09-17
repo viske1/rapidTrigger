@@ -1,7 +1,8 @@
 import type { ReactNode } from "react";
 
 interface FieldProps {
-  label: string;
+  /** Intitulé du champ ; absent quand le contenu se suffit à lui-même. */
+  label?: string;
   children: ReactNode;
 }
 
@@ -17,9 +18,33 @@ export function Field({ label, children }: FieldProps) {
       className="flex w-full flex-col items-start justify-center rounded-[18px]
         border border-black bg-white/5 p-3"
     >
-      <span className="mb-2 pl-1 text-[13px] font-medium tracking-[-0.1px] text-white">
-        {label}
-      </span>
+      {label && (
+        <span className="mb-2 pl-1 text-[13px] font-medium tracking-[-0.1px] text-white">
+          {label}
+        </span>
+      )}
+      {children}
+    </div>
+  );
+}
+
+/** Intitulé seul, pour un champ placé dans un FieldGroup. */
+export function FieldLabel({ label }: { label: string }) {
+  return (
+    <span className="mb-2 pl-1 block text-[13px] font-medium tracking-[-0.1px] text-white">
+      {label}
+    </span>
+  );
+}
+
+/** Même bloc en relief, mais accueillant plusieurs champs côte à côte. */
+export function FieldGroup({ children }: { children: ReactNode }) {
+  return (
+    <div
+      style={{ boxShadow: RELIEF }}
+      className="flex w-full items-start gap-3 rounded-[18px] border border-black
+        bg-white/5 p-3"
+    >
       {children}
     </div>
   );

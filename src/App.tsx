@@ -1,6 +1,8 @@
 import { useMemo, useState } from "react";
 import { ShortcutList } from "./components/ShortcutList";
-import { ShortcutModal } from "./components/ShortcutModal";
+import { ShortcutEditor } from "./components/ShortcutEditor";
+import { ViewSwitch } from "./components/ViewSwitch";
+import { ConfirmModal } from "./components/ConfirmModal";
 import { MacDemo } from "./components/MacDemo";
 import { Modal } from "./components/Modal";
 import { MacKeyboard } from "./components/MacKeyboard";
@@ -47,6 +49,9 @@ export default function App() {
   const [historyOpen, setHistoryOpen] = useState(false);
   /** Combinaison de la ligne survolée, mise en avant sur le clavier. */
   const [hoveredCombo, setHoveredCombo] = useState<string | null>(null);
+  /* Abandon de l'édition à confirmer : la modale est rendue ici pour que son
+     fond couvre aussi le clavier, frère de la vue. */
+  const [confirmingClose, setConfirmingClose] = useState(false);
 
   /** Jeu en cours de nommage : création, ou renommage d'un jeu existant. */
   const [setNaming, setSetNaming] = useState<
@@ -158,61 +163,95 @@ export default function App() {
           className="max-w-[75%]"
           contained
         >
-          <Header
-            sets={sets}
-            activeSetId={activeSetId}
-            onSelectSet={selectSet}
-            onCreateSet={() => setSetNaming({ mode: "create" })}
-            onDuplicateSet={duplicateSet}
-            onRenameSet={(id) => {
-              const set = sets.find((s) => s.id === id);
-              if (set) setSetNaming({ mode: "rename", id, name: set.name });
-            }}
-            onDeleteSet={handleDeleteSet}
-            search={search}
-            onSearchChange={setSearch}
-            onNew={() => setEditing("")}
-            onToggleHistory={() => setHistoryOpen((o) => !o)}
-            historyOpen={historyOpen}
-            onExport={handleExport}
-            onImport={handleImport}
-            onReset={handleReset}
-          />
-
-          {/* La modale est en flex-col : le header garde sa taille, ce bloc
-              prend la hauteur restante. Les colonnes s'y tiennent en pleine
-              hauteur (items-stretch), et seule la liste défile. */}
-          <main
-            className={`grid min-h-0 flex-1 grid-cols-1 gap-8 overflow-hidden px-4 pb-4
-              ${historyOpen ? "xl:grid-cols-[230px_1fr_280px]" : "xl:grid-cols-[230px_1fr]"}`}
+          {/*
+            L'édition se passe du header : le replier en hauteur libère la
+            place pour le formulaire, avec la même sortie que la vue.
+          */}
+          <div
+            aria-hidden={editing !== null}
+            className={`shrink-0 overflow-hidden transition-all duration-[260ms] ease-out
+              motion-reduce:transition-none
+              ${editing === null
+                ? "max-h-[80px] opacity-100 blur-0"
+                : "pointer-events-none max-h-0 opacity-0 blur-[3px]"}`}
           >
-            <SearchPanel
-              shortcuts={state.shortcuts}
-              scope={scope}
-              modifiedCount={modifiedCount}
-              conflictCount={conflicts.size}
-              onScopeChange={setScope}
-              onlyModified={onlyModified}
-              onlyConflicts={onlyConflicts}
-              onOnlyModifiedChange={setOnlyModified}
-              onOnlyConflictsChange={setOnlyConflicts}
+            <Header
+              sets={sets}
+              activeSetId={activeSetId}
+              onSelectSet={selectSet}
+              onCreateSet={() => setSetNaming({ mode: "create" })}
+              onDuplicateSet={duplicateSet}
+              onRenameSet={(id) => {
+                const set = sets.find((s) => s.id === id);
+                if (set) setSetNaming({ mode: "rename", id, name: set.name });
+              }}
+              onDeleteSet={handleDeleteSet}
+              search={search}
+              onSearchChange={setSearch}
+              onNew={() => setEditing("")}
+              onToggleHistory={() => setHistoryOpen((o) => !o)}
+              historyOpen={historyOpen}
+              onExport={handleExport}
+              onImport={handleImport}
+              onReset={handleReset}
             />
+          </div>
 
-            <ShortcutList
-              shortcuts={visible}
-              scope={scope}
-              conflicts={conflicts}
-              onEdit={setEditing}
-              onRestore={restoreShortcut}
-              onDelete={handleDelete}
-              onToggleSuspended={toggleSuspended}
-              onHover={setHoveredCombo}
-            />
+          <ViewSwitch viewKey={editing === null ? "list" : "editor"}>
+            {editing === null ? (
+              <>
+            {/* La modale est en flex-col : le header garde sa taille, ce bloc
+                prend la hauteur restante. Les colonnes s'y tiennent en pleine
+                hauteur (items-stretch), et seule la liste défile. */}
+            <main
+              className={`grid min-h-0 flex-1 grid-cols-1 gap-8 overflow-hidden px-4 pb-4
+                ${historyOpen ? "xl:grid-cols-[230px_1fr_280px]" : "xl:grid-cols-[230px_1fr]"}`}
+            >
+              <SearchPanel
+                shortcuts={state.shortcuts}
+                scope={scope}
+                modifiedCount={modifiedCount}
+                conflictCount={conflicts.size}
+                onScopeChange={setScope}
+                onlyModified={onlyModified}
+                onlyConflicts={onlyConflicts}
+                onOnlyModifiedChange={setOnlyModified}
+                onOnlyConflictsChange={setOnlyConflicts}
+              />
 
-            {historyOpen && (
-              <ChangeLog history={state.history} onClear={clearHistory} />
+              <ShortcutList
+                shortcuts={visible}
+                scope={scope}
+                conflicts={conflicts}
+                onEdit={setEditing}
+                onRestore={restoreShortcut}
+                onDelete={handleDelete}
+                onToggleSuspended={toggleSuspended}
+                onHover={setHoveredCombo}
+              />
+
+              {historyOpen && (
+                <ChangeLog history={state.history} onClear={clearHistory} />
+              )}
+            </main>
+              </>
+            ) : (
+              <div className="flex min-h-0 flex-1 flex-col px-4 pb-4">
+                <ShortcutEditor
+                  editing={
+                    editing
+                      ? (state.shortcuts.find((s) => s.id === editing) ?? null)
+                      : null
+                  }
+                  shortcuts={state.shortcuts}
+                  currentScope={scope}
+                  onSubmit={handleSubmit}
+                  onClose={() => setEditing(null)}
+                  onDirtyClose={() => setConfirmingClose(true)}
+                />
+              </div>
             )}
-          </main>
+          </ViewSwitch>
 
           {/*
             Clavier de synthèse : chaque touche s'éclaire à proportion de son
@@ -228,17 +267,17 @@ export default function App() {
             />
           </div>
 
-          <ShortcutModal
-            open={editing !== null}
-            editing={
-              editing
-                ? (state.shortcuts.find((s) => s.id === editing) ?? null)
-                : null
-            }
-            shortcuts={state.shortcuts}
-            currentScope={scope}
-            onSubmit={handleSubmit}
-            onClose={() => setEditing(null)}
+
+          <ConfirmModal
+            open={confirmingClose}
+            title="Abandonner les modifications ?"
+            message="Les informations saisies seront perdues."
+            confirmLabel="Abandonner"
+            onConfirm={() => {
+              setConfirmingClose(false);
+              setEditing(null);
+            }}
+            onCancel={() => setConfirmingClose(false)}
           />
 
           <SetNameModal

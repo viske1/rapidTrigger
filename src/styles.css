@@ -139,6 +139,23 @@
     transition: opacity 0.2s ease-out 0.06s;
   }
 
+  /*
+   * Cascade d'entrée : chaque bloc de la vue monte légèrement, décalé de
+   * 40 ms sur son prédécesseur. Appliqué au conteneur, il anime ses enfants
+   * directs sans que chacun ait à porter son propre délai.
+   *
+   * `both` fige l'état de départ avant le délai : la classe ne doit donc
+   * être posée que le temps de l'animation, sinon la vue reste invisible.
+   */
+  .view-cascade > * {
+    animation: view-rise 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .view-cascade > *:nth-child(1) { animation-delay: 0ms; }
+  .view-cascade > *:nth-child(2) { animation-delay: 40ms; }
+  .view-cascade > *:nth-child(3) { animation-delay: 80ms; }
+  .view-cascade > *:nth-child(4) { animation-delay: 120ms; }
+  .view-cascade > *:nth-child(n + 5) { animation-delay: 160ms; }
+
   /* Champs de formulaire */
   .field {
     @apply mt-[5px] w-full rounded-lg border border-line bg-panel2 px-2.5 py-2 font-sans
@@ -174,5 +191,22 @@
   .shimmer {
     animation: none;
     color: rgb(255 255 255 / 0.85);
+  }
+}
+
+@keyframes view-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .view-cascade > * {
+    animation: none;
   }
 }

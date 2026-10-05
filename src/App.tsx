@@ -52,6 +52,8 @@ export default function App() {
   /* Abandon de l'édition à confirmer : la modale est rendue ici pour que son
      fond couvre aussi le clavier, frère de la vue. */
   const [confirmingClose, setConfirmingClose] = useState(false);
+  /* Combinaison saisie dans l'éditeur, illustrée sur le clavier du bas. */
+  const [editorCombo, setEditorCombo] = useState("");
 
   /** Jeu en cours de nommage : création, ou renommage d'un jeu existant. */
   const [setNaming, setSetNaming] = useState<
@@ -160,7 +162,7 @@ export default function App() {
           open={panelOpen}
           onClose={() => setPanelOpen(false)}
           label="Centre de contrôle des raccourcis"
-          className="max-w-[75%]"
+          className="max-w-[65%]"
           contained
         >
           {/*
@@ -171,9 +173,11 @@ export default function App() {
             aria-hidden={editing !== null}
             className={`shrink-0 overflow-hidden transition-all duration-[260ms] ease-out
               motion-reduce:transition-none
-              ${editing === null
-                ? "max-h-[80px] opacity-100 blur-0"
-                : "pointer-events-none max-h-0 opacity-0 blur-[3px]"}`}
+              ${
+                editing === null
+                  ? "max-h-[80px] opacity-100 blur-0"
+                  : "pointer-events-none max-h-0 opacity-0 blur-[3px]"
+              }`}
           >
             <Header
               sets={sets}
@@ -200,43 +204,43 @@ export default function App() {
           <ViewSwitch viewKey={editing === null ? "list" : "editor"}>
             {editing === null ? (
               <>
-            {/* La modale est en flex-col : le header garde sa taille, ce bloc
+                {/* La modale est en flex-col : le header garde sa taille, ce bloc
                 prend la hauteur restante. Les colonnes s'y tiennent en pleine
                 hauteur (items-stretch), et seule la liste défile. */}
-            <main
-              className={`grid min-h-0 flex-1 grid-cols-1 gap-8 overflow-hidden px-4 pb-4
+                <main
+                  className={`grid min-h-0 flex-1 grid-cols-1 gap-8 overflow-hidden px-4 pb-4
                 ${historyOpen ? "xl:grid-cols-[230px_1fr_280px]" : "xl:grid-cols-[230px_1fr]"}`}
-            >
-              <SearchPanel
-                shortcuts={state.shortcuts}
-                scope={scope}
-                modifiedCount={modifiedCount}
-                conflictCount={conflicts.size}
-                onScopeChange={setScope}
-                onlyModified={onlyModified}
-                onlyConflicts={onlyConflicts}
-                onOnlyModifiedChange={setOnlyModified}
-                onOnlyConflictsChange={setOnlyConflicts}
-              />
+                >
+                  <SearchPanel
+                    shortcuts={state.shortcuts}
+                    scope={scope}
+                    modifiedCount={modifiedCount}
+                    conflictCount={conflicts.size}
+                    onScopeChange={setScope}
+                    onlyModified={onlyModified}
+                    onlyConflicts={onlyConflicts}
+                    onOnlyModifiedChange={setOnlyModified}
+                    onOnlyConflictsChange={setOnlyConflicts}
+                  />
 
-              <ShortcutList
-                shortcuts={visible}
-                scope={scope}
-                conflicts={conflicts}
-                onEdit={setEditing}
-                onRestore={restoreShortcut}
-                onDelete={handleDelete}
-                onToggleSuspended={toggleSuspended}
-                onHover={setHoveredCombo}
-              />
+                  <ShortcutList
+                    shortcuts={visible}
+                    scope={scope}
+                    conflicts={conflicts}
+                    onEdit={setEditing}
+                    onRestore={restoreShortcut}
+                    onDelete={handleDelete}
+                    onToggleSuspended={toggleSuspended}
+                    onHover={setHoveredCombo}
+                  />
 
-              {historyOpen && (
-                <ChangeLog history={state.history} onClear={clearHistory} />
-              )}
-            </main>
+                  {historyOpen && (
+                    <ChangeLog history={state.history} onClear={clearHistory} />
+                  )}
+                </main>
               </>
             ) : (
-              <div className="flex min-h-0 flex-1 flex-col px-4 pb-4">
+              <div className="flex min-h-0 flex-1 flex-col px-4 pb-4 h-[212px]">
                 <ShortcutEditor
                   editing={
                     editing
@@ -248,6 +252,7 @@ export default function App() {
                   onSubmit={handleSubmit}
                   onClose={() => setEditing(null)}
                   onDirtyClose={() => setConfirmingClose(true)}
+                  onComboChange={setEditorCombo}
                 />
               </div>
             )}
@@ -258,15 +263,48 @@ export default function App() {
             emploi dans le jeu, et passe en pleine lumière quand on survole
             une ligne de la liste.
           */}
-          <div className="shrink-0 px-4 pb-4">
-            <MacKeyboard
-              shortcuts={state.shortcuts}
-              highlight={hoveredCombo ?? ""}
-              interactive
-              onSelect={setEditing}
-            />
+          {/*
+            Le clavier accompagne le changement de vue : il disparaît avec
+            elle, puis se rejoue à l'entrée — d'abord d'un bloc, puis touche
+            par touche. Rien n'est animé en continu, donc aucun recalcul de
+            mise en page pendant la transition.
+          */}
+          <div
+            style={{ perspective: "900px" }}
+            className="shrink-0 px-4 pb-4 h-[212px]"
+          >
+            {/*
+              Deux conteneurs : l'inclinaison est portée par celui-ci, et
+              l'animation d'entrée par le suivant. Sur un seul élément,
+              l'animation — prioritaire sur un style inline — écraserait la
+              rotation, puisque toutes deux passent par `transform`.
+            */}
+            <div
+              style={{
+                transform:
+                  editing === null
+                    ? undefined
+                    : "rotateX(25deg) translateY(12%) translateY(-100px)",
+                transformOrigin: "center bottom",
+              }}
+            >
+              <div
+                key={editing === null ? "keyboard-list" : "keyboard-editor"}
+                className="keyboard-enter"
+              >
+                <MacKeyboard
+                  shortcuts={state.shortcuts}
+                  unit={editing === null ? 26 : 40}
+                  highlight={
+                    editing === null ? (hoveredCombo ?? "") : editorCombo
+                  }
+                  interactive={editing === null}
+                  animateKeys
+                  onSelect={setEditing}
+                />
+              </div>
+            </div>
           </div>
-
 
           <ConfirmModal
             open={confirmingClose}

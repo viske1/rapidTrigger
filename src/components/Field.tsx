@@ -16,7 +16,7 @@ export function Field({ label, children }: FieldProps) {
     <div
       style={{ boxShadow: RELIEF }}
       className="flex w-full flex-col items-start justify-center rounded-[18px]
-        border border-black bg-white/5 p-3"
+        border border-black bg-[#1d1d1f] p-3"
     >
       {label && (
         <span className="mb-2 pl-1 text-[13px] font-medium tracking-[-0.1px] text-white">
@@ -43,7 +43,7 @@ export function FieldGroup({ children }: { children: ReactNode }) {
     <div
       style={{ boxShadow: RELIEF }}
       className="flex w-full items-start gap-3 rounded-[18px] border border-black
-        bg-white/5 p-3"
+        bg-[#1d1d1f] p-3"
     >
       {children}
     </div>
@@ -51,8 +51,7 @@ export function FieldGroup({ children }: { children: ReactNode }) {
 }
 
 /** Classe commune aux contrôles placés dans un Field. */
-export const FIELD_INPUT =
-  `h-[34px] w-full rounded-[10px] border-0 bg-black/[.04] px-3 text-[13px]
+export const FIELD_INPUT = `h-[34px] w-full rounded-[10px] border-0 bg-black/[.04] px-3 text-[13px]
    font-medium tracking-[-0.1px] text-content outline-none transition-all
    duration-200 placeholder:text-content/40 focus:ring-2 focus:ring-black/10
    dark:bg-white/[.06] dark:text-content-dark

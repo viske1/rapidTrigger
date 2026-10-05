@@ -27,6 +27,8 @@ interface ShortcutEditorProps {
   onClose: () => void;
   /** Fermeture demandée alors que la saisie a changé : à confirmer. */
   onDirtyClose: () => void;
+  /** Signale la combinaison en cours, illustrée sur le clavier du bas. */
+  onComboChange?: (combo: string) => void;
 }
 
 const DEFAULT_HINT =
@@ -48,6 +50,7 @@ export function ShortcutEditor({
   onSubmit,
   onClose,
   onDirtyClose,
+  onComboChange,
 }: ShortcutEditorProps) {
   const [draft, setDraft] = useState<ShortcutDraft>(() => ({
     name: editing?.name ?? "",
@@ -117,6 +120,10 @@ export function ShortcutEditor({
     draft.target !== (editing?.target ?? "") ||
     draft.combo !== (editing?.combo ?? "");
 
+  useEffect(() => {
+    onComboChange?.(draft.combo);
+  }, [draft.combo, onComboChange]);
+
   function requestClose() {
     if (dirty) onDirtyClose();
     else onClose();
@@ -140,7 +147,7 @@ export function ShortcutEditor({
     <div className="flex min-h-0 flex-1 flex-col">
       <form
         onSubmit={handleSubmit}
-        className="flex min-h-0 flex-1 flex-col overflow-hidden p-4 pt-6"
+        className="flex min-h-0 flex-1 flex-col overflow-hidden px-4 pt-6"
       >
         <div className="mb-5 flex shrink-0 items-center justify-between gap-2">
           <h3
@@ -186,8 +193,8 @@ export function ShortcutEditor({
           </div>
         </div>
 
-        <div className="flex min-h-0 flex-1 gap-12 overflow-hidden">
-          <div className="flex min-w-0 flex-1 flex-col gap-2.5 overflow-y-auto">
+        <div className="flex min-h-0 flex-1 gap-12 overflow-hidden ">
+          <div className="field-cascade flex min-w-0 flex-1 flex-col gap-2.5 overflow-y-auto">
             <Field label="Nom de l'action">
               <input
                 required
@@ -204,7 +211,7 @@ export function ShortcutEditor({
             {/* Un seul bloc : la cible occupe la moitié, type et portée un quart. */}
             <FieldGroup>
               <div className="w-1/2 min-w-0">
-                <FieldLabel label="Cible (fichier, dossier, application, URL…)" />
+                <FieldLabel label="Cible (fichier, dossier, application)" />
                 <input
                   required
                   value={draft.target}
@@ -248,14 +255,6 @@ export function ShortcutEditor({
                 onFocus={() => setCapturing(true)}
                 onBlur={() => setCapturing(false)}
               />
-
-              <p
-                className={`mt-1.5 pl-1 text-[11px] ${
-                  hint.error ? "text-danger" : "text-muted dark:text-muted-dark"
-                }`}
-              >
-                {hint.text}
-              </p>
             </Field>
           </div>
 

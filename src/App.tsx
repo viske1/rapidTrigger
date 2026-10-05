@@ -171,12 +171,17 @@ export default function App() {
           */}
           <div
             aria-hidden={editing !== null}
-            className={`shrink-0 overflow-hidden transition-all duration-[260ms] ease-out
+            /*
+              overflow-hidden et opacity ne valent que pendant le repli : le
+              premier rognerait les menus du header, le second créerait un
+              contexte d'empilement qui les enfermerait sous la vue.
+            */
+            className={`relative z-20 shrink-0 transition-all duration-[260ms] ease-out
               motion-reduce:transition-none
               ${
                 editing === null
-                  ? "max-h-[80px] opacity-100 blur-0"
-                  : "pointer-events-none max-h-0 opacity-0 blur-[3px]"
+                  ? "max-h-[80px] blur-0"
+                  : "pointer-events-none max-h-0 overflow-hidden opacity-0 blur-[3px]"
               }`}
           >
             <Header
